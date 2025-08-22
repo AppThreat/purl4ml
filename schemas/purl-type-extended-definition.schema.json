@@ -1,0 +1,694 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://packageurl.org/schemas/purl-type-extended-definition.schema-1.0.json",
+  "title": "Package-URL Type Definition",
+  "description": "Schema to specify a Package-URL (PURL) type as a structured definition with ML-friendly attributes.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "requirement": {
+      "title": "Component requirement",
+      "description": "States if this PURL component is required, optional, or prohibited.",
+      "type": "string",
+      "enum": [
+        "required",
+        "optional",
+        "prohibited"
+      ],
+      "meta:enum": {
+        "required": "This PURL component is required for this PURL type.",
+        "optional": "This PURL component is optional for this PURL type.",
+        "prohibited": "This PURL component is prohibited: it must not be present for this PURL type."
+      }
+    },
+    "purl_component_definition": {
+      "title": "PURL component definition",
+      "description": "PURL component definition properties that apply to most PURL components",
+      "type": "object",
+      "properties": {
+        "requirement": {
+          "$ref": "#/definitions/requirement"
+        },
+        "permitted_characters": {
+          "title": "Permitted characters in this PURL component",
+          "description": "Regular expression (ECMA-262 dialect) defining the 'Permitted characters' for this component of this Package-URL type. If provided, this must be a subset of the 'Permitted characters' defined in the PURL specification.",
+          "type": "string",
+          "format": "regex"
+        },
+        "case_sensitive": {
+          "title": "Case sensitive",
+          "description": "true if this PURL component is case sensitive. If false, the canonical form must be lowercased.",
+          "type": "boolean",
+          "default": true
+        },
+        "encoding": {
+          "title": "Encoding rule",
+          "description": "Specifies the encoding rule for this component.",
+          "type": "string",
+          "enum": [
+            "percent-encoded",
+            "lowercase",
+            "verbatim",
+            "url-safe",
+            "case-sensitive"
+          ]
+        },
+        "normalization_rules": {
+          "title": "Normalization rules",
+          "description": "List of rules to normalize this component for this PURL type. These are plain text, unstructured rules as some require programming and cannot be enforced only with a schema. Tools are expected to apply these rules programmatically.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "native_name": {
+          "title": "Native name",
+          "description": "The native name of this PURL component in the package ecosystem. For instance, the 'namespace' for the 'maven' type is 'groupId', and 'scope' for the 'npm' PURL type.",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "description": "Extra note text.",
+          "type": "string"
+        }
+      }
+    },
+    "example": {
+      "title": "PURL example",
+      "description": "Example of a valid PURL with description.",
+      "type": "object",
+      "properties": {
+        "purl": {
+          "title": "PURL string",
+          "description": "The PURL string example.",
+          "type": "string",
+          "pattern": "^pkg:[a-z][a-z0-9-\\.]+/.*$"
+        },
+        "description": {
+          "title": "Description",
+          "description": "Description of the example.",
+          "type": "string"
+        }
+      },
+      "required": ["purl", "description"]
+    },
+    "incorrect_example": {
+      "title": "Incorrect PURL example",
+      "description": "Example of an invalid PURL with description and violation explanation.",
+      "type": "object",
+      "properties": {
+        "purl": {
+          "title": "PURL string",
+          "description": "The invalid PURL string example.",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "description": "Description of why the PURL is invalid.",
+          "type": "string"
+        },
+        "violation": {
+          "title": "Violation",
+          "description": "The specific rule or requirement that is violated.",
+          "type": "string"
+        }
+      },
+      "required": ["purl", "description", "violation"]
+    },
+    "reference": {
+      "title": "Reference",
+      "description": "Reference to documentation or specification.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "description": "Title of the reference.",
+          "type": "string"
+        },
+        "url": {
+          "title": "URL",
+          "description": "URL of the reference.",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["title", "url"]
+    },
+    "common_pattern": {
+      "title": "Common pattern",
+      "description": "Common pattern for PURLs of this type.",
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "title": "Pattern",
+          "description": "The pattern template.",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "description": "Description of the pattern.",
+          "type": "string"
+        },
+        "example": {
+          "title": "Example",
+          "description": "Example of the pattern.",
+          "type": "string"
+        }
+      },
+      "required": ["pattern", "description", "example"]
+    },
+    "edge_case": {
+      "title": "Edge case",
+      "description": "Edge case handling for PURLs of this type.",
+      "type": "object",
+      "properties": {
+        "case": {
+          "title": "Case",
+          "description": "Description of the edge case.",
+          "type": "string"
+        },
+        "handling": {
+          "title": "Handling",
+          "description": "How the edge case should be handled.",
+          "type": "string"
+        },
+        "purl_impact": {
+          "title": "PURL impact",
+          "description": "Impact on the PURL structure or parsing.",
+          "type": "string"
+        }
+      },
+      "required": ["case", "handling", "purl_impact"]
+    },
+    "parsing_step": {
+      "title": "Parsing step",
+      "description": "A step in the parsing decision tree.",
+      "type": "object",
+      "properties": {
+        "question": {
+          "title": "Question",
+          "description": "The question to determine the next step.",
+          "type": "string"
+        },
+        "yes": {
+          "title": "Yes path",
+          "description": "Action to take if the answer is yes.",
+          "type": "string"
+        },
+        "no": {
+          "title": "No path",
+          "description": "Action to take if the answer is no.",
+          "type": "string"
+        }
+      },
+      "required": ["question", "yes", "no"]
+    }
+  },
+  "required": [
+    "$id",
+    "type",
+    "type_name",
+    "description",
+    "repository",
+    "namespace_definition",
+    "name_definition",
+    "examples"
+  ],
+  "properties": {
+    "$schema": {
+      "title": "JSON schema",
+      "description": "Contains the URL of the JSON schema for Package-URL type definition.",
+      "constant": "https://packageurl.org/schemas/purl-type.schema-1.0.json",
+      "format": "uri"
+    },
+    "$id": {
+      "title": "PURL type definition id",
+      "description": "The unique identifier URI for this PURL type definition.",
+      "type": "string",
+      "pattern": "^https:\\/\\/packageurl\\.org/types/[a-z0-9-]+-definition\\.json$"
+    },
+    "type": {
+      "title": "PURL type",
+      "description": "The type string for this Package-URL type.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-\\.]+$",
+      "examples": [
+        "maven",
+        "npm",
+        "pypi"
+      ]
+    },
+    "type_name": {
+      "title": "Type name",
+      "description": "The name for this PURL type.",
+      "type": "string",
+      "examples": [
+        "Apache Maven",
+        "Python Package"
+      ]
+    },
+    "description": {
+      "title": "Description",
+      "description": "The description of this PURL type.",
+      "type": "string"
+    },
+    "uri_compliance": {
+      "title": "URI compliance",
+      "description": "Explicit encoding rules for PURL components.",
+      "type": "object",
+      "properties": {
+        "namespace_encoding": {
+          "title": "Namespace encoding",
+          "description": "Encoding rule for the namespace component.",
+          "type": "string",
+          "enum": ["percent-encoded", "lowercase", "verbatim", "url-safe", "case-sensitive"]
+        },
+        "name_encoding": {
+          "title": "Name encoding",
+          "description": "Encoding rule for the name component.",
+          "type": "string",
+          "enum": ["percent-encoded", "lowercase", "verbatim", "url-safe", "case-sensitive"]
+        },
+        "version_encoding": {
+          "title": "Version encoding",
+          "description": "Encoding rule for the version component.",
+          "type": "string",
+          "enum": ["percent-encoded", "lowercase", "verbatim", "url-safe", "case-sensitive"]
+        }
+      }
+    },
+    "repository": {
+      "title": "Repository",
+      "description": "Package repository usage for this PURL type.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "use_repository"
+      ],
+      "properties": {
+        "use_repository": {
+          "title": "Use repository",
+          "description": "true if this PURL type use a public package repository.",
+          "type": "boolean",
+          "default": false
+        },
+        "default_repository_url": {
+          "title": "Default repository URL",
+          "description": "The default public repository URL for this PURL type",
+          "type": "string",
+          "format": "uri"
+        },
+        "supported_repositories": {
+          "title": "Supported repositories",
+          "description": "List of supported repository URLs for this PURL type.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "supported_qualifiers": {
+          "title": "Supported qualifiers",
+          "description": "List of qualifiers that can be used to specify repositories.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "title": "Note",
+          "description": "Extra note text.",
+          "type": "string"
+        }
+      }
+    },
+    "namespace_definition": {
+      "title": "Namespace definition",
+      "description": "Definition of the namespace component for this PURL type.",
+      "type": "object",
+      "required": [
+        "requirement"
+      ],
+      "properties": {
+        "requirement": {
+          "$ref": "#/definitions/requirement"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/purl_component_definition"
+        }
+      ]
+    },
+    "name_definition": {
+      "title": "Name definition",
+      "description": "Definition of the name component for this PURL type.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/purl_component_definition"
+        }
+      ]
+    },
+    "version_definition": {
+      "title": "Version definition",
+      "description": "Definition of the version component for this PURL type.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/purl_component_definition"
+        }
+      ]
+    },
+    "qualifiers_definition": {
+      "title": "Qualifiers definition",
+      "description": "Definition for the qualifiers specific to this PURL type.",
+      "type": "array",
+      "additionalItems": false,
+      "uniqueItems": true,
+      "items": {
+        "title": "Qualifiers definition",
+        "description": "Definition of a qualifier specific to this PURL type.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "description"
+        ],
+        "properties": {
+          "key": {
+            "title": "Qualifier key",
+            "description": "The key for the qualifier.",
+            "type": "string"
+          },
+          "requirement": {
+            "$ref": "#/definitions/requirement"
+          },
+          "description": {
+            "title": "Description",
+            "description": "The description of this qualifier.",
+            "type": "string"
+          },
+          "default_value": {
+            "title": "Default value",
+            "description": "The optional default value of this qualifier if not provided.",
+            "type": "string"
+          },
+          "native_name": {
+            "title": "Native name",
+            "description": "The equivalent native name for this qualifier key.",
+            "type": "string"
+          },
+          "examples": {
+            "title": "Examples",
+            "description": "Example values for this qualifier.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "subpath_definition": {
+      "title": "Subpath definition",
+      "description": "Definition for the subpath for this PURL type.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/purl_component_definition"
+        }
+      ]
+    },
+    "validation_rules": {
+      "title": "Validation rules",
+      "description": "Programmatic compliance checking rules for PURL components.",
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "title": "Namespace validation",
+          "description": "Validation rules for the namespace component.",
+          "type": "object",
+          "properties": {
+            "encoding_required": {
+              "title": "Required encoding",
+              "description": "Specific encoding required for this component.",
+              "type": "string"
+            },
+            "examples_valid": {
+              "title": "Valid examples",
+              "description": "Examples of valid namespace values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "examples_invalid": {
+              "title": "Invalid examples",
+              "description": "Examples of invalid namespace values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "name": {
+          "title": "Name validation",
+          "description": "Validation rules for the name component.",
+          "type": "object",
+          "properties": {
+            "min_length": {
+              "title": "Minimum length",
+              "description": "Minimum length of the name.",
+              "type": "integer"
+            },
+            "max_length": {
+              "title": "Maximum length",
+              "description": "Maximum length of the name.",
+              "type": "integer"
+            },
+            "no_uppercase": {
+              "title": "No uppercase",
+              "description": "Whether uppercase letters are prohibited.",
+              "type": "boolean"
+            },
+            "url_safe_required": {
+              "title": "URL safe required",
+              "description": "Whether URL-safe characters are required.",
+              "type": "boolean"
+            },
+            "examples_valid": {
+              "title": "Valid examples",
+              "description": "Examples of valid name values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "examples_invalid": {
+              "title": "Invalid examples",
+              "description": "Examples of invalid name values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "version": {
+          "title": "Version validation",
+          "description": "Validation rules for the version component.",
+          "type": "object",
+          "properties": {
+            "format": {
+              "title": "Format",
+              "description": "Expected format of the version.",
+              "type": "string"
+            },
+            "supports_epoch": {
+              "title": "Supports epoch",
+              "description": "Whether the version supports epoch notation.",
+              "type": "boolean"
+            },
+            "examples_valid": {
+              "title": "Valid examples",
+              "description": "Examples of valid version values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "examples_invalid": {
+              "title": "Invalid examples",
+              "description": "Examples of invalid version values.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "common_patterns": {
+      "title": "Common patterns",
+      "description": "Common patterns for PURLs of this type.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/common_pattern"
+      }
+    },
+    "anti_patterns": {
+      "title": "Anti-patterns",
+      "description": "Common invalid patterns for PURLs of this type.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "parsing_decision_tree": {
+      "title": "Parsing decision tree",
+      "description": "Step-by-step logic for parsing PURLs of this type.",
+      "type": "object",
+      "properties": {
+        "steps": {
+          "title": "Steps",
+          "description": "Steps in the parsing decision tree.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/parsing_step"
+          }
+        }
+      }
+    },
+    "context": {
+      "title": "Context",
+      "description": "Ecosystem understanding for semantic accuracy.",
+      "type": "object",
+      "properties": {
+        "ecosystem": {
+          "title": "Ecosystem",
+          "description": "The ecosystem this PURL type belongs to.",
+          "type": "string"
+        },
+        "package_manager": {
+          "title": "Package manager",
+          "description": "The package manager used in this ecosystem.",
+          "type": "string"
+        },
+        "url_scheme": {
+          "title": "URL scheme",
+          "description": "The URL scheme used for PURLs.",
+          "type": "string"
+        },
+        "hierarchical_structure": {
+          "title": "Hierarchical structure",
+          "description": "The hierarchical structure of PURLs for this type.",
+          "type": "string"
+        },
+        "versioning_system": {
+          "title": "Versioning system",
+          "description": "The versioning system used by this ecosystem.",
+          "type": "string"
+        },
+        "backward_compatibility": {
+          "title": "Backward compatibility",
+          "description": "Backward compatibility notes.",
+          "type": "string"
+        },
+        "forward_compatibility": {
+          "title": "Forward compatibility",
+          "description": "Forward compatibility notes.",
+          "type": "string"
+        }
+      }
+    },
+    "edge_cases": {
+      "title": "Edge cases",
+      "description": "Handling of real-world complexity.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/edge_case"
+      }
+    },
+    "llm_guidance": {
+      "title": "LLM guidance",
+      "description": "Direct instruction for language models.",
+      "type": "object",
+      "properties": {
+        "do_not_assume": {
+          "title": "Do not assume",
+          "description": "Things that should not be assumed about this PURL type.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "key_facts_to_remember": {
+          "title": "Key facts to remember",
+          "description": "Important facts about this PURL type.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "common_mistakes_to_avoid": {
+          "title": "Common mistakes to avoid",
+          "description": "Common mistakes when working with this PURL type.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "examples": {
+      "title": "PURL examples",
+      "description": "Example of valid, canonical PURLs for this package type.",
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/example"
+      }
+    },
+    "incorrect_examples": {
+      "title": "Incorrect PURL examples",
+      "description": "Examples of invalid PURLs for this package type.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/incorrect_example"
+      }
+    },
+    "references": {
+      "title": "References",
+      "description": "List of informational reference URLs about this PURL type.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/reference"
+      }
+    },
+    "note": {
+      "title": "Note",
+      "description": "Note about this PURL type.",
+      "type": "string"
+    },
+    "metadata": {
+      "title": "Metadata",
+      "description": "Metadata about this PURL type definition.",
+      "type": "object",
+      "properties": {
+        "last_updated": {
+          "title": "Last updated",
+          "description": "Date when this definition was last updated.",
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  }
+}
