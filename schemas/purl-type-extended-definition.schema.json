@@ -262,7 +262,7 @@
           "title": "Namespace encoding",
           "description": "Encoding rule for the namespace component.",
           "type": "string",
-          "enum": ["percent-encoded", "lowercase", "verbatim", "url-safe", "case-sensitive"]
+          "enum": ["percent-encoded", "lowercase", "uppercase", "verbatim", "url-safe", "case-sensitive"]
         },
         "name_encoding": {
           "title": "Name encoding",

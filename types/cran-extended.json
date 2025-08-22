@@ -1,0 +1,187 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/cran-extended-definition.json",
+  "type": "cran",
+  "type_name": "CRAN",
+  "description": "CRAN R packages",
+  "uri_compliance": {
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://cran.r-project.org",
+    "supported_repositories": [
+      "https://cran.r-project.org"
+    ],
+    "note": "CRAN packages are hosted on the Comprehensive R Archive Network"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "there is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "name",
+    "note": "The name is the package name and is case sensitive, but there cannot be two packages on CRAN with the same name ignoring case."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the package version."
+  },
+  "qualifiers_definition": [],
+  "validation_rules": {
+    "name": {
+      "case_sensitive": true,
+      "unique_case_insensitive": true,
+      "examples_valid": ["A3", "rJava", "caret"],
+      "examples_invalid": ["", "A 3", "r@Java"]
+    },
+    "version": {
+      "format": "cran-version",
+      "supports_hyphen": true,
+      "examples_valid": ["1.0.0", "1.0-4", "6.0-88"],
+      "examples_invalid": ["", "latest", "v1.0.0"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:cran/{name}@{version}",
+      "description": "Standard CRAN package reference",
+      "example": "pkg:cran/A3@1.0.0"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:cran/namespace/A3@1.0.0",
+    "pkg:cran/a3@1.0.0",
+    "pkg:cran/A3",
+    "pkg:cran/A3@",
+    "pkg:cran/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for cran",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a name component?",
+        "yes": "Extract the name (component after pkg:cran/)",
+        "no": "Invalid PURL - name is required for cran"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for cran"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "R",
+    "package_manager": "CRAN",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:cran/{name}@{version}?{qualifiers}",
+    "versioning_system": "CRAN-specific versioning with hyphen support",
+    "naming_convention": "Case-sensitive package names but unique case-insensitive",
+    "repository_model": "Centralized with CRAN as the primary repository"
+  },
+  "edge_cases": [
+    {
+      "case": "Case sensitivity in package names",
+      "handling": "Package names are case-sensitive but CRAN enforces uniqueness ignoring case",
+      "purl_impact": "While technically case-sensitive, packages should be referenced with their canonical case"
+    },
+    {
+      "case": "Version formats with hyphens",
+      "handling": "Versions can contain hyphens to represent patch levels",
+      "purl_impact": "Hyphens in versions are preserved exactly as specified"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "CRAN packages have namespaces",
+      "Package names are case-insensitive",
+      "Version can be omitted",
+      "Package names can contain spaces or special characters",
+      "All packages follow standard SemVer"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for cran packages",
+      "Package name is required and case-sensitive",
+      "Version is required and follows CRAN versioning format",
+      "Package names must be unique case-insensitive on CRAN",
+      "Versions can contain hyphens"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Omitting the required version component",
+      "Using incorrect case for package names",
+      "Using invalid characters in package names",
+      "Assuming versions follow standard SemVer"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:cran/A3@1.0.0",
+      "description": "A3 package for R"
+    },
+    {
+      "purl": "pkg:cran/rJava@1.0-4",
+      "description": "rJava package with hyphen in version"
+    },
+    {
+      "purl": "pkg:cran/caret@6.0-88",
+      "description": "caret package for machine learning"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:cran/namespace/A3@1.0.0",
+      "description": "Includes namespace component - namespace is prohibited for cran",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:cran/a3@1.0.0",
+      "description": "Package name with incorrect case - while technically different, CRAN enforces uniqueness case-insensitive",
+      "violation": "CRAN enforces unique package names case-insensitive"
+    },
+    {
+      "purl": "pkg:cran/A3",
+      "description": "Missing version component - version is required for cran",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:cran/A3@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:cran/",
+      "description": "Missing package name component - name is required for cran",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "CRAN Documentation",
+      "url": "https://cran.r-project.org/doc/manuals/r-release/R-exts.html"
+    },
+    {
+      "title": "R Package Management",
+      "url": "https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

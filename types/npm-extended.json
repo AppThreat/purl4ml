@@ -1,5 +1,5 @@
 {
-  "$schema": "https://packageurl.org/schemas/purl-type.schema-1.0.json",
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
   "$id": "https://packageurl.org/types/npm-extended-definition.json",
   "type": "npm",
   "type_name": "Node NPM packages",

@@ -1,0 +1,209 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/bitbucket-extended-definition.json",
+  "type": "bitbucket",
+  "type_name": "Bitbucket",
+  "description": "Bitbucket-based packages",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://bitbucket.org",
+    "supported_repositories": [
+      "https://bitbucket.org"
+    ],
+    "note": "Bitbucket repositories are hosted at https://bitbucket.org"
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "user or organization",
+    "note": "The namespace is the user or organization. It is not case sensitive and must be lowercased."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "repository name",
+    "note": "The name is the repository name. It is not case sensitive and must be lowercased."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "commit or tag",
+    "note": "The version is a commit or tag."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Custom repository URL for self-hosted Bitbucket instances",
+      "examples": ["https://bitbucket.mycompany.com"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["birkenfeld", "myorg", "user123"],
+      "examples_invalid": ["Birkenfeld", "my org", "user@123"]
+    },
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["pygments-main", "my-repo", "project_name"],
+      "examples_invalid": ["Pygments-Main", "my repo", "project@name"]
+    },
+    "version": {
+      "format": "commit-hash-or-tag",
+      "examples_valid": ["244fd47e07d1014f0aed9c", "v1.0.0", "release-2.3"],
+      "examples_invalid": ["", "244fd47e07d1014f0aed9c@", "@v1.0.0"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:bitbucket/{user}/{repo}@{commit}",
+      "description": "Standard Bitbucket repository with commit hash",
+      "example": "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c"
+    },
+    {
+      "pattern": "pkg:bitbucket/{user}/{repo}@{tag}",
+      "description": "Bitbucket repository with version tag",
+      "example": "pkg:bitbucket/myorg/myproject@v2.1.0"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:bitbucket/Birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
+    "pkg:bitbucket/birkenfeld/Pygments-Main@244fd47e07d1014f0aed9c",
+    "pkg:bitbucket/birkenfeld/pygments-main",
+    "pkg:bitbucket/birkenfeld",
+    "pkg:bitbucket"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a user/organization component?",
+        "yes": "Extract the user/organization (first component after pkg:bitbucket/)",
+        "no": "Invalid PURL - user/organization is required for bitbucket"
+      },
+      {
+        "question": "Is there a repository name component?",
+        "yes": "Extract the repository name (component after user/)",
+        "no": "Invalid PURL - repository name is required for bitbucket"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for bitbucket"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Bitbucket",
+    "package_manager": "Git",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:bitbucket/{user}/{repo}@{version}?{qualifiers}",
+    "versioning_system": "Git commit hashes or tags",
+    "repository_model": "Centralized with default at https://bitbucket.org",
+    "self_hosted_support": "Supported via repository_url qualifier"
+  },
+  "edge_cases": [
+    {
+      "case": "Self-hosted Bitbucket instances",
+      "handling": "Use repository_url qualifier to specify non-default Bitbucket server",
+      "purl_impact": "Allows referencing packages from enterprise Bitbucket installations"
+    },
+    {
+      "case": "Version ambiguity between commit hashes and tags",
+      "handling": "Both commit hashes and tags are valid version identifiers",
+      "purl_impact": "No special distinction needed in PURL format"
+    },
+    {
+      "case": "Repository name with special characters",
+      "handling": "Special characters must be URL-encoded in the PURL",
+      "purl_impact": "Ensures proper parsing of repositories with special characters in name"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "All Bitbucket packages use the default bitbucket.org URL",
+      "Repository names can contain uppercase letters",
+      "Version must be a commit hash (tags are also valid)",
+      "User/organization names can contain spaces",
+      "Version component is optional"
+    ],
+    "key_facts_to_remember": [
+      "User/organization is required and must be lowercase",
+      "Repository name is required and must be lowercase",
+      "Version is required and can be a commit hash or tag",
+      "Self-hosted instances use repository_url qualifier",
+      "All components must be URL-safe"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in user/organization or repository name",
+      "Omitting the required version component",
+      "Confusing with GitHub PURLs",
+      "Forgetting to encode special characters",
+      "Assuming all packages are on bitbucket.org"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
+      "description": "Bitbucket repository with commit hash"
+    },
+    {
+      "purl": "pkg:bitbucket/myorg/myproject@v2.1.0",
+      "description": "Bitbucket repository with version tag"
+    },
+    {
+      "purl": "pkg:bitbucket/company/internal-repo@abc123def456?repository_url=https://bitbucket.company.com",
+      "description": "Repository from self-hosted Bitbucket instance"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:bitbucket/Birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
+      "description": "User/organization with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:bitbucket/birkenfeld/Pygments-Main@244fd47e07d1014f0aed9c",
+      "description": "Repository name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:bitbucket/birkenfeld/pygments-main",
+      "description": "Missing version component - version is required for bitbucket",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:bitbucket/birkenfeld",
+      "description": "Missing repository name component - repository name is required for bitbucket",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:bitbucket",
+      "description": "Missing user/organization component - user/organization is required for bitbucket",
+      "violation": "namespace_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Bitbucket Documentation",
+      "url": "https://support.atlassian.com/bitbucket-cloud/"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

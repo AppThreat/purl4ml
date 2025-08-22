@@ -1,0 +1,224 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/cocoapods-extended-definition.json",
+  "type": "cocoapods",
+  "type_name": "CocoaPods",
+  "description": "CocoaPods pods",
+  "uri_compliance": {
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim",
+    "subpath_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://cdn.cocoapods.org/",
+    "supported_repositories": [
+      "https://cdn.cocoapods.org/"
+    ],
+    "note": "CocoaPods pods are hosted on the official CocoaPods CDN"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "there is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "pod name",
+    "note": "The name is the pod name and is case sensitive, cannot contain whitespace, a plus (+) character, or begin with a period (.)."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "package version",
+    "note": "The version is the package version."
+  },
+  "subpath_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "subspec",
+    "note": "The purl subpath is used to represent a pods subspec (if present)."
+  },
+  "validation_rules": {
+    "name": {
+      "no_whitespace": true,
+      "no_plus": true,
+      "no_leading_period": true,
+      "case_sensitive": true,
+      "examples_valid": ["AFNetworking", "MapsIndoors", "ShareKit", "GoogleUtilities"],
+      "examples_invalid": ["AF Networking", "Share+Kit", ".PodName", "pod/name"]
+    },
+    "version": {
+      "format": "semver",
+      "examples_valid": ["4.0.1", "3.24.0", "2.0", "7.5.2"],
+      "examples_invalid": ["latest", "v4.0.1", "4.0.1.0"]
+    },
+    "subpath": {
+      "format": "subspec",
+      "examples_valid": ["Twitter", "NSData+zlib", "Core", "UI"],
+      "examples_invalid": ["Twitter/Sub", "Twitter#Sub", " Twitter"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:cocoapods/{name}@{version}",
+      "description": "Standard CocoaPods package reference",
+      "example": "pkg:cocoapods/AFNetworking@4.0.1"
+    },
+    {
+      "pattern": "pkg:cocoapods/{name}@{version}#{subspec}",
+      "description": "CocoaPods package with subspec",
+      "example": "pkg:cocoapods/ShareKit@2.0#Twitter"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:cocoapods/namespace/AFNetworking@4.0.1",
+    "pkg:cocoapods/AF Networking@4.0.1",
+    "pkg:cocoapods/AFNetworking@latest",
+    "pkg:cocoapods/AFNetworking",
+    "pkg:cocoapods/",
+    "pkg:cocoapods/ShareKit@2.0#Twitter/Sub"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for cocoapods",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a name component?",
+        "yes": "Extract the name (component after pkg:cocoapods/)",
+        "no": "Invalid PURL - name is required for cocoapods"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for cocoapods"
+      },
+      {
+        "question": "Is there a subpath component?",
+        "yes": "Extract everything after # as subspec",
+        "no": "No subspec present"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "iOS/macOS",
+    "package_manager": "CocoaPods",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:cocoapods/{name}@{version}[#{subspec}][?{qualifiers}]",
+    "versioning_system": "Semantic Versioning (SemVer)",
+    "subspec_support": "Pods can have subspecs represented as subpaths",
+    "platform_support": "iOS, macOS, watchOS, tvOS"
+  },
+  "edge_cases": [
+    {
+      "case": "Pods with special characters in name",
+      "handling": "Pod names cannot contain whitespace, plus (+) or begin with period",
+      "purl_impact": "These characters are prohibited and must not be used"
+    },
+    {
+      "case": "Subspecs with nested structure",
+      "handling": "Subspecs can have nested structure using + or other separators",
+      "purl_impact": "Subpath represents the full subspec path"
+    },
+    {
+      "case": "Case sensitivity in pod names",
+      "handling": "Pod names are case-sensitive and must be preserved exactly",
+      "purl_impact": "Changing case would reference a different pod"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "CocoaPods packages have namespaces",
+      "Pod names are case-insensitive",
+      "Version can be omitted",
+      "Pod names can contain whitespace or plus characters",
+      "Pod names can begin with a period"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for cocoapods packages",
+      "Pod name is required and case-sensitive",
+      "Version is required and follows SemVer",
+      "Subpath is used for subspecs when present",
+      "Pod names cannot contain whitespace, plus (+), or begin with period"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using non-SemVer version strings",
+      "Using prohibited characters in pod names",
+      "Forgetting that pod names are case-sensitive",
+      "Using incorrect subpath format for subspecs"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:cocoapods/AFNetworking@4.0.1",
+      "description": "Networking library for iOS/macOS"
+    },
+    {
+      "purl": "pkg:cocoapods/MapsIndoors@3.24.0",
+      "description": "Indoor mapping SDK"
+    },
+    {
+      "purl": "pkg:cocoapods/ShareKit@2.0#Twitter",
+      "description": "Social sharing library with Twitter subspec"
+    },
+    {
+      "purl": "pkg:cocoapods/GoogleUtilities@7.5.2#NSData+zlib",
+      "description": "Google utilities library with NSData+zlib subspec"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:cocoapods/namespace/AFNetworking@4.0.1",
+      "description": "Includes namespace component - namespace is prohibited for cocoapods",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:cocoapods/AF Networking@4.0.1",
+      "description": "Pod name with whitespace - whitespace is prohibited in pod names",
+      "violation": "name_definition note prohibits whitespace"
+    },
+    {
+      "purl": "pkg:cocoapods/AFNetworking@latest",
+      "description": "Non-SemVer version - versions must follow SemVer format",
+      "violation": "version_definition requires SemVer format"
+    },
+    {
+      "purl": "pkg:cocoapods/AFNetworking",
+      "description": "Missing version component - version is required for cocoapods",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:cocoapods/",
+      "description": "Missing package name component - name is required for cocoapods",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:cocoapods/ShareKit@2.0#Twitter/Sub",
+      "description": "Invalid subpath format - subspecs cannot contain / characters",
+      "violation": "subpath_definition does not support nested paths with /"
+    }
+  ],
+  "references": [
+    {
+      "title": "CocoaPods Guides",
+      "url": "https://guides.cocoapods.org/"
+    },
+    {
+      "title": "CocoaPods Podspec Reference",
+      "url": "https://guides.cocoapods.org/syntax/podspec.html"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

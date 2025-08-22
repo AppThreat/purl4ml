@@ -77,10 +77,22 @@ To address this gap, this repository proposes the creation of byte-sized, focuse
 
 ## Process
 
-Enhancing the specification with machine-readable details requires careful attention to syntax, semantics, and edge cases, making it a labor-intensive task when done manually. To streamline this process, we evaluated four frontier language models—Gemini 2.5 Pro, GPT-5 Thinking, Qwen3 Coder, and GLM-4.5—to assess their ability to generate accurate, detailed, and structured enhanced specification from the original PURL specification. Our initial effort, published as `cdx-docs`, leveraged Gemini 2.5 Pro, which produced acceptable results for larger, more capable models but lacked the granularity required to effectively train smaller or quantized models. These models often need more explicit reasoning, validation rules, and failure examples to achieve reliable performance. Among the models tested, GLM-4.5 demonstrated superior comprehension of the specification’s nuances, generating more precise parsing logic, clearer validity criteria, and better-structured illustrative examples—key attributes essential for ML readiness. The prompt used to guide this enhancement process is [available](./PROMPT.md) in the repository, ensuring transparency and reproducibility of the methodology.
+Enhancing the specification with machine-readable details requires careful attention to syntax, semantics, and edge cases, making it a labor-intensive task when done manually. To streamline this process, we evaluated four frontier language models—Gemini 2.5 Pro, GPT-5 Thinking, Qwen3 Coder, and GLM-4.5—to assess their ability to generate accurate, detailed, and structured enhanced specification from the original PURL specification. Our initial effort, [published](https://github.com/CycloneDX/cdxgen/blob/master/contrib/fine-tuning/semantics/purl-101.jsonl) as [cdx-docs](https://huggingface.co/datasets/CycloneDX/cdx-docs), leveraged Gemini 2.5 Pro, which produced acceptable results for larger, more capable models but lacked the granularity required to effectively train smaller or quantized models. These models often need more explicit reasoning, validation rules, and failure examples to achieve reliable performance. Among the models tested, GLM-4.5 demonstrated superior comprehension of the specification’s nuances, generating more precise parsing logic, clearer validity criteria, and better-structured illustrative examples—key attributes essential for ML readiness. The prompt used to guide this enhancement process is [available](./PROMPT.md) in the repository, ensuring transparency and reproducibility of the methodology.
 
 The enhanced data generated through this process is openly available for community review and collaboration. We encourage contributions from practitioners, specification experts, and ML engineers to help refine and improve the quality of the dataset. If you identify any inaccuracies, edge cases that need clarification, or opportunities for improvement, please feel free to submit a pull request or open an issue in the repository. Your feedback is invaluable in ensuring the accuracy, completeness, and utility of this resource for the broader machine learning and developer community.
 
 ## License
 
 MIT
+
+## Citation
+
+Use the below citation in your research.
+
+@misc{vdb,
+  author = {Team AppThreat},
+  month = Aug,
+  title = {{AppThreat purl4ml}},
+  howpublished = {{https://huggingface.co/datasets/AppThreat/purl4ml}},
+  year = {2025}
+}

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/bitnami-extended-definition.json",
+  "type": "bitnami",
+  "type_name": "Bitnami",
+  "description": "Bitnami-based packages",
+  "uri_compliance": {
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://downloads.bitnami.com/files/stacksmith",
+    "supported_repositories": [
+      "https://downloads.bitnami.com/files/stacksmith"
+    ],
+    "note": "Bitnami packages are hosted at https://downloads.bitnami.com/files/stacksmith"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "there is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "name",
+    "note": "The name is the component name. It must be lowercased."
+  },
+  "version_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "full package version, including version and revision",
+    "note": "The version is the full Bitnami package version, including version and revision."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "description": "The arch is the qualifiers key for a package architecture. Available values are amd64 (default) and arm64.",
+      "default_value": "amd64",
+      "examples": ["amd64", "arm64"]
+    },
+    {
+      "key": "distro",
+      "requirement": "optional",
+      "description": "The distro is the qualifiers key for the distribution associated to the package.",
+      "examples": ["debian-12", "ubuntu-22.04", "photon-4", "rhel-9"]
+    }
+  ],
+  "validation_rules": {
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["wordpress", "apache", "postgresql"],
+      "examples_invalid": ["WordPress", "my component", "my@component"]
+    },
+    "version": {
+      "format": "bitnami-version",
+      "supports_revision": true,
+      "examples_valid": ["6.2.0", "5.8.3-1", "2.4.57-2"],
+      "examples_invalid": ["", "6.2.0@", "@6.2.0"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:bitnami/{name}?distro={distro}",
+      "description": "Basic Bitnami package with distribution",
+      "example": "pkg:bitnami/wordpress?distro=debian-12"
+    },
+    {
+      "pattern": "pkg:bitnami/{name}@{version}?distro={distro}",
+      "description": "Bitnami package with version and distribution",
+      "example": "pkg:bitnami/wordpress@6.2.0?distro=debian-12"
+    },
+    {
+      "pattern": "pkg:bitnami/{name}@{version}?arch={arch}&distro={distro}",
+      "description": "Bitnami package with version, architecture, and distribution",
+      "example": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=debian-12"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:bitnami/WordPress?distro=debian-12",
+    "pkg:bitnami/namespace/wordpress?distro=debian-12",
+    "pkg:bitnami/wordpress@6.2.0",
+    "pkg:bitnami/wordpress@6.2.0?arch=invalid&distro=debian-12",
+    "pkg:bitnami/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for bitnami",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a name component?",
+        "yes": "Extract the name (component after pkg:bitnami/)",
+        "no": "Invalid PURL - name is required for bitnami"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Version is optional for bitnami"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Bitnami",
+    "package_manager": "Bitnami Stacksmith",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:bitnami/{name}[@{version}]?{qualifiers}",
+    "versioning_system": "Bitnami-specific versioning with optional revision",
+    "architecture_support": "amd64 (default) and arm64",
+    "distribution_support": "Multiple Linux distributions"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages without version",
+      "handling": "Version is optional and can be omitted",
+      "purl_impact": "Allows referencing the latest version of a package"
+    },
+    {
+      "case": "Default architecture",
+      "handling": "When arch qualifier is omitted, defaults to amd64",
+      "purl_impact": "Simplifies PURLs for the most common architecture"
+    },
+    {
+      "case": "Packages with revision in version",
+      "handling": "Version includes revision number with dash prefix (e.g., -1, -2)",
+      "purl_impact": "Revision must be preserved as it affects package version comparison"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "Bitnami packages have namespaces",
+      "Package names can contain uppercase letters",
+      "Version is required for all packages",
+      "Architecture qualifier is required",
+      "All packages support all distributions"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for bitnami packages",
+      "Package name is required and must be lowercase",
+      "Version is optional and includes revision when present",
+      "Architecture defaults to amd64 when not specified",
+      "Distribution qualifier is typically required"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using uppercase letters in package name",
+      "Omitting the distribution qualifier",
+      "Using invalid architecture values",
+      "Forgetting that version is optional"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:bitnami/wordpress?distro=debian-12",
+      "description": "Basic Bitnami package with distribution"
+    },
+    {
+      "purl": "pkg:bitnami/wordpress@6.2.0?distro=debian-12",
+      "description": "Bitnami package with version and distribution"
+    },
+    {
+      "purl": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=debian-12",
+      "description": "Bitnami package with version, architecture, and distribution"
+    },
+    {
+      "purl": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=photon-4",
+      "description": "Bitnami package with Photon OS distribution"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:bitnami/namespace/wordpress?distro=debian-12",
+      "description": "Includes namespace component - namespace is prohibited for bitnami",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:bitnami/WordPress?distro=debian-12",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:bitnami/wordpress@6.2.0",
+      "description": "Missing distribution qualifier - typically required for bitnami packages",
+      "violation": "qualifiers_definition suggests distro is important for bitnami packages"
+    },
+    {
+      "purl": "pkg:bitnami/wordpress@6.2.0?arch=invalid&distro=debian-12",
+      "description": "Invalid architecture value - only amd64 and arm64 are supported",
+      "violation": "qualifiers_definition.arch only supports amd64 and arm64"
+    },
+    {
+      "purl": "pkg:bitnami/",
+      "description": "Missing package name component - name is required for bitnami",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Bitnami Documentation",
+      "url": "https://docs.bitnami.com/"
+    },
+    {
+      "title": "Bitnami Package Index",
+      "url": "https://downloads.bitnami.com/files/stacksmith"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

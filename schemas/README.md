@@ -1,6 +1,6 @@
 # Introduction
 
-Following are some enhancements made to the original purl-type schema definition to improve clarity, completeness, and machine-readability. 
+Following are the enhancements made to the original purl-type [schema](https://github.com/package-url/purl-spec/blob/main/schemas/purl-type-definition.schema.json) definition to improve clarity, completeness, and machine-readability. 
 
 1. Added `uri_compliance` section for explicit encoding rules
 2. Added `validation_rules` section for programmatic compliance checking
