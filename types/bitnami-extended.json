@@ -18,7 +18,7 @@
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for Bitnami packages."
   },
   "name_definition": {
     "requirement": "required",
@@ -31,20 +31,21 @@
     "requirement": "optional",
     "encoding": "verbatim",
     "native_name": "full package version, including version and revision",
-    "note": "The version is the full Bitnami package version, including version and revision."
+    "note": "The version is the full Bitnami package version, which follows a 'version[-revision]' format (e.g., 6.2.0 or 5.8.3-1). If omitted, the PURL refers to the latest available version for the specified distribution."
   },
   "qualifiers_definition": [
     {
       "key": "arch",
       "requirement": "optional",
-      "description": "The arch is the qualifiers key for a package architecture. Available values are amd64 (default) and arm64.",
+      "description": "The qualifier for package architecture. The value must be one of the enumerated examples. It defaults to 'amd64' if not specified.",
       "default_value": "amd64",
       "examples": ["amd64", "arm64"]
     },
     {
       "key": "distro",
-      "requirement": "optional",
-      "description": "The distro is the qualifiers key for the distribution associated to the package.",
+      "requirement": "required",
+      "description": "The qualifier for the Linux distribution associated with the package. This is required to uniquely identify a package artifact.",
+      "note": "The list of examples is not exhaustive. Refer to Bitnami documentation for a full list of supported distributions.",
       "examples": ["debian-12", "ubuntu-22.04", "photon-4", "rhel-9"]
     }
   ],
@@ -56,7 +57,7 @@
       "examples_invalid": ["WordPress", "my component", "my@component"]
     },
     "version": {
-      "format": "bitnami-version",
+      "format_regex": "^[a-zA-Z0-9.+~-]+$",
       "supports_revision": true,
       "examples_valid": ["6.2.0", "5.8.3-1", "2.4.57-2"],
       "examples_invalid": ["", "6.2.0@", "@6.2.0"]
@@ -65,17 +66,17 @@
   "common_patterns": [
     {
       "pattern": "pkg:bitnami/{name}?distro={distro}",
-      "description": "Basic Bitnami package with distribution",
+      "description": "Bitnami package for a specific distribution (latest version).",
       "example": "pkg:bitnami/wordpress?distro=debian-12"
     },
     {
       "pattern": "pkg:bitnami/{name}@{version}?distro={distro}",
-      "description": "Bitnami package with version and distribution",
+      "description": "Bitnami package with a specific version and distribution.",
       "example": "pkg:bitnami/wordpress@6.2.0?distro=debian-12"
     },
     {
       "pattern": "pkg:bitnami/{name}@{version}?arch={arch}&distro={distro}",
-      "description": "Bitnami package with version, architecture, and distribution",
+      "description": "Bitnami package with a specific version, architecture, and distribution.",
       "example": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=debian-12"
     }
   ],
@@ -104,9 +105,9 @@
         "no": "Version is optional for bitnami"
       },
       {
-        "question": "Are there qualifiers?",
+        "question": "Does the 'distro' qualifier exist?",
         "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "no": "Invalid PURL - 'distro' qualifier is required for bitnami"
       }
     ]
   },
@@ -122,85 +123,84 @@
   "edge_cases": [
     {
       "case": "Packages without version",
-      "handling": "Version is optional and can be omitted",
-      "purl_impact": "Allows referencing the latest version of a package"
+      "handling": "Version is optional and can be omitted. The PURL refers to the latest version for the specified distribution.",
+      "purl_impact": "Allows referencing the latest version of a package."
     },
     {
       "case": "Default architecture",
-      "handling": "When arch qualifier is omitted, defaults to amd64",
-      "purl_impact": "Simplifies PURLs for the most common architecture"
+      "handling": "When the 'arch' qualifier is omitted, it defaults to 'amd64'.",
+      "purl_impact": "Simplifies PURLs for the most common architecture."
     },
     {
-      "case": "Packages with revision in version",
-      "handling": "Version includes revision number with dash prefix (e.g., -1, -2)",
-      "purl_impact": "Revision must be preserved as it affects package version comparison"
+      "case": "Case sensitivity of qualifiers",
+      "handling": "Qualifier keys and values are case-sensitive as per the main PURL specification.",
+      "purl_impact": "Implementers must not normalize the case of qualifier values."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Bitnami packages have namespaces",
-      "Package names can contain uppercase letters",
-      "Version is required for all packages",
-      "Architecture qualifier is required",
-      "All packages support all distributions"
+      "Bitnami packages have namespaces.",
+      "Package names can contain uppercase letters.",
+      "Version is required for all packages.",
+      "The 'distro' qualifier is optional."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for bitnami packages",
-      "Package name is required and must be lowercase",
-      "Version is optional and includes revision when present",
-      "Architecture defaults to amd64 when not specified",
-      "Distribution qualifier is typically required"
+      "Namespace is prohibited for bitnami packages.",
+      "Package name is required and must be lowercase.",
+      "The 'distro' qualifier is required.",
+      "Version is optional and includes a revision when present.",
+      "Architecture ('arch') defaults to 'amd64' when not specified."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Using uppercase letters in package name",
-      "Omitting the distribution qualifier",
-      "Using invalid architecture values",
-      "Forgetting that version is optional"
+      "Adding a namespace component.",
+      "Using uppercase letters in the package name.",
+      "Omitting the 'distro' qualifier.",
+      "Using invalid architecture values (only 'amd64' and 'arm64' are allowed).",
+      "Forgetting that version is optional."
     ]
   },
   "examples": [
     {
       "purl": "pkg:bitnami/wordpress?distro=debian-12",
-      "description": "Basic Bitnami package with distribution"
+      "description": "Bitnami package with distribution (latest version)."
     },
     {
       "purl": "pkg:bitnami/wordpress@6.2.0?distro=debian-12",
-      "description": "Bitnami package with version and distribution"
+      "description": "Bitnami package with version and distribution."
     },
     {
       "purl": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=debian-12",
-      "description": "Bitnami package with version, architecture, and distribution"
+      "description": "Bitnami package with version, architecture, and distribution."
     },
     {
       "purl": "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=photon-4",
-      "description": "Bitnami package with Photon OS distribution"
+      "description": "Bitnami package with Photon OS distribution."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:bitnami/namespace/wordpress?distro=debian-12",
-      "description": "Includes namespace component - namespace is prohibited for bitnami",
+      "description": "Includes namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:bitnami/WordPress?distro=debian-12",
-      "description": "Package name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+      "description": "Package name contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "name_definition.encoding=lowercase"
     },
     {
       "purl": "pkg:bitnami/wordpress@6.2.0",
-      "description": "Missing distribution qualifier - typically required for bitnami packages",
-      "violation": "qualifiers_definition suggests distro is important for bitnami packages"
+      "description": "Missing the 'distro' qualifier, which is required.",
+      "violation": "qualifiers_definition.distro.requirement=required"
     },
     {
       "purl": "pkg:bitnami/wordpress@6.2.0?arch=invalid&distro=debian-12",
-      "description": "Invalid architecture value - only amd64 and arm64 are supported",
-      "violation": "qualifiers_definition.arch only supports amd64 and arm64"
+      "description": "Invalid architecture value. Only 'amd64' and 'arm64' are supported.",
+      "violation": "qualifiers_definition.arch.examples"
     },
     {
       "purl": "pkg:bitnami/",
-      "description": "Missing package name component - name is required for bitnami",
+      "description": "Missing package name component, which is required.",
       "violation": "name_definition.requirement=required"
     }
   ],
@@ -215,6 +215,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
