@@ -1,0 +1,257 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/alpm-definition.json",
+  "type": "alpm",
+  "type_name": "Arch Linux package",
+  "description": "Arch Linux packages and other users of the libalpm/pacman package manager.",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "lowercase",
+    "version_encoding": "case-sensitive"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no default package repository; this should be implied either from the distro qualifiers key or using a repository base url as repository_url qualifiers key.",
+    "supported_qualifiers": [
+      "distro",
+      "repository_url"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "vendor",
+    "note": "The namespace is the vendor such as arch, arch32, archarm, manjaro or msys.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "name",
+    "note": "The name is the package name. It is not case sensitive and must be lowercased."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the version of the package as specified in vercmp(8) at https://man.archlinux.org/man/vercmp.8#DESCRIPTION as part of alpm.",
+    "normalization_rules": [
+      "normalize version as specified in vercmp(8) at https://man.archlinux.org/man/vercmp.8#DESCRIPTION as part of alpm."
+    ]
+  },
+  "qualifiers_definition": [
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "native_name": "arch",
+      "description": "The arch is the qualifiers key for a package architecture.",
+      "examples": ["x86_64", "i686", "any", "arm"]
+    },
+    {
+      "key": "distro",
+      "requirement": "optional",
+      "description": "The distribution name when using multiple distributions",
+      "examples": ["arch", "manjaro", "endeavouros"]
+    },
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Base URL for the package repository",
+      "examples": ["https://archive.archlinux.org/"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["arch", "manjaro", "archarm"],
+      "examples_invalid": ["Arch", "Manjaro", "ARCH"]
+    },
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["pacman", "python-pip", "containers-common"],
+      "examples_invalid": ["Pacman", "python pip", "containers@common"]
+    },
+    "version": {
+      "format": "vercmp(8) compliant",
+      "supports_epoch": true,
+      "examples_valid": ["6.0.1-1", "21.0-1", "1:0.47.4-4"],
+      "examples_invalid": ["6.0.1", "21.0", "0.47.4-4:"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:alpm/{vendor}/{name}@{version}?arch={arch}",
+      "description": "Standard Arch Linux package with architecture",
+      "example": "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64"
+    },
+    {
+      "pattern": "pkg:alpm/{vendor}/{name}@{version}?arch=any",
+      "description": "Architecture-independent package",
+      "example": "pkg:alpm/arch/python-pip@21.0-1?arch=any"
+    },
+    {
+      "pattern": "pkg:alpm/{vendor}/{name}@{epoch}:{version}-{release}?arch={arch}",
+      "description": "Package with epoch in version",
+      "example": "pkg:alpm/arch/containers-common@1:0.47.4-4?arch=x86_64"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:alpm/Arch/pacman@6.0.1-1?arch=x86_64",
+    "pkg:alpm/arch/Pacman@6.0.1-1?arch=x86_64",
+    "pkg:alpm/arch/pacman@6.0.1?arch=x86_64",
+    "pkg:alpm/arch/pacman?arch=x86_64",
+    "pkg:alpm/arch?arch=x86_64",
+    "pkg:alpm/pacman@6.0.1-1?arch=x86_64"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a vendor/namespace component?",
+        "yes": "Extract the vendor (first component after pkg:alpm/)",
+        "no": "Invalid PURL - vendor is required for alpm"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the package name (component after vendor/)",
+        "no": "Invalid PURL - package name is required for alpm"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for alpm"
+      },
+      {
+        "question": "Does the version contain an epoch?",
+        "yes": "Parse epoch as the number before the first colon",
+        "no": "Proceed with version parsing"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Arch Linux",
+    "package_manager": "pacman/libalpm",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:alpm/{vendor}/{name}@{version}?{qualifiers}",
+    "versioning_system": "vercmp(8)",
+    "architecture_support": "Specific architectures (x86_64, i686, arm, etc.) or architecture-independent (any)",
+    "repository_model": "Distributed with no central default repository"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages with epoch in version",
+      "handling": "Epoch is represented as a number followed by colon at the beginning of version",
+      "purl_impact": "Epoch must be preserved in PURL as it affects version comparison"
+    },
+    {
+      "case": "Architecture-independent packages",
+      "handling": "Use 'any' as the architecture value",
+      "purl_impact": "These packages can be installed on any architecture"
+    },
+    {
+      "case": "Multiple repositories for same vendor",
+      "handling": "Use repository_url qualifier to specify non-default repository",
+      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "All alpm packages use the 'arch' vendor",
+      "Package names can contain uppercase letters",
+      "Versions follow standard SemVer",
+      "Architecture qualifier is optional",
+      "There is a default repository URL"
+    ],
+    "key_facts_to_remember": [
+      "Vendor/namespace is required and must be lowercase",
+      "Package name is required and must be lowercase",
+      "Version is required and follows vercmp(8) specification",
+      "Versions may include epoch (number followed by colon)",
+      "Architecture qualifier should be included when known"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in vendor or package name",
+      "Omitting the required version component",
+      "Forgetting to include architecture when it's relevant",
+      "Misinterpreting epoch in version as part of the package name",
+      "Assuming a default repository URL"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
+      "description": "Standard Arch Linux package for x86_64 architecture"
+    },
+    {
+      "purl": "pkg:alpm/arch/python-pip@21.0-1?arch=any",
+      "description": "Architecture-independent Python package"
+    },
+    {
+      "purl": "pkg:alpm/arch/containers-common@1:0.47.4-4?arch=x86_64",
+      "description": "Package with epoch (1) in version"
+    },
+    {
+      "purl": "pkg:alpm/manjaro/systemd@251.7-1?arch=x86_64",
+      "description": "Package from Manjaro vendor"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:alpm/Arch/pacman@6.0.1-1?arch=x86_64",
+      "description": "Vendor with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:alpm/arch/Pacman@6.0.1-1?arch=x86_64",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:alpm/arch/pacman@6.0.1?arch=x86_64",
+      "description": "Missing release number in version - violates vercmp(8) format",
+      "violation": "version_definition requires vercmp(8) compliant version with release number"
+    },
+    {
+      "purl": "pkg:alpm/arch/pacman?arch=x86_64",
+      "description": "Missing version component - version is required for alpm",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:alpm/arch?arch=x86_64",
+      "description": "Missing package name component - package name is required for alpm",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:alpm/pacman@6.0.1-1?arch=x86_64",
+      "description": "Missing vendor/namespace component - vendor is required for alpm",
+      "violation": "namespace_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Arch Linux Package Management",
+      "url": "https://wiki.archlinux.org/title/Pacman"
+    },
+    {
+      "title": "vercmp(8) manual page",
+      "url": "https://man.archlinux.org/man/vercmp.8"
+    },
+    {
+      "title": "Arch Linux Package Naming Guidelines",
+      "url": "https://wiki.archlinux.org/title/Arch_package_guidelines#Package_naming"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}
