@@ -15,14 +15,14 @@
     "supported_repositories": [
       "https://bitbucket.org"
     ],
-    "note": "Bitbucket repositories are hosted at https://bitbucket.org"
+    "note": "Bitbucket repositories are hosted at https://bitbucket.org by default, but self-hosted instances are common."
   },
   "namespace_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
-    "native_name": "user or organization",
-    "note": "The namespace is the user or organization. It is not case sensitive and must be lowercased."
+    "native_name": "user, organization, or project key",
+    "note": "The namespace is the user or organization (for Bitbucket Cloud), or the Project Key (for Bitbucket Server/Data Center). It is not case sensitive and must be lowercased."
   },
   "name_definition": {
     "requirement": "required",
@@ -35,13 +35,17 @@
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "commit or tag",
-    "note": "The version is a commit or tag."
+    "note": "The version is an immutable commit hash (full or short) or a tag. Branch names (e.g., 'main') should not be used as they are mutable pointers."
+  },
+  "subpath_definition": {
+    "requirement": "optional",
+    "note": "The subpath is used to specify a subdirectory within the repository, which is essential for monorepos."
   },
   "qualifiers_definition": [
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Custom repository URL for self-hosted Bitbucket instances",
+      "description": "Custom repository URL for self-hosted Bitbucket Server/Data Center instances.",
       "examples": ["https://bitbucket.mycompany.com"]
     }
   ],
@@ -49,7 +53,7 @@
     "namespace": {
       "lowercase_required": true,
       "no_spaces": true,
-      "examples_valid": ["birkenfeld", "myorg", "user123"],
+      "examples_valid": ["birkenfeld", "myorg", "projkey"],
       "examples_invalid": ["Birkenfeld", "my org", "user@123"]
     },
     "name": {
@@ -60,39 +64,44 @@
     },
     "version": {
       "format": "commit-hash-or-tag",
-      "examples_valid": ["244fd47e07d1014f0aed9c", "v1.0.0", "release-2.3"],
-      "examples_invalid": ["", "244fd47e07d1014f0aed9c@", "@v1.0.0"]
+      "examples_valid": ["244fd47e07d1014f0aed9c", "v1.0.0", "release-2.3", "abcdef1"],
+      "examples_invalid": ["v1.0 with space", "main", "develop"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:bitbucket/{user}/{repo}@{commit}",
-      "description": "Standard Bitbucket repository with commit hash",
+      "description": "Bitbucket Cloud repository with commit hash",
       "example": "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c"
     },
     {
-      "pattern": "pkg:bitbucket/{user}/{repo}@{tag}",
-      "description": "Bitbucket repository with version tag",
-      "example": "pkg:bitbucket/myorg/myproject@v2.1.0"
+      "pattern": "pkg:bitbucket/{project_key}/{repo}@{tag}?repository_url={url}",
+      "description": "Bitbucket Server repository with version tag",
+      "example": "pkg:bitbucket/proj/my-repo@v2.1.0?repository_url=https://bitbucket.company.com"
+    },
+    {
+      "pattern": "pkg:bitbucket/{user}/{repo}@{tag}?subpath={path}",
+      "description": "Bitbucket repository referencing a package in a sub-directory (monorepo)",
+      "example": "pkg:bitbucket/atlassian/atlassian-frontend@v104.1.0?subpath=packages/analytics"
     }
   ],
   "anti_patterns": [
     "pkg:bitbucket/Birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
     "pkg:bitbucket/birkenfeld/Pygments-Main@244fd47e07d1014f0aed9c",
     "pkg:bitbucket/birkenfeld/pygments-main",
-    "pkg:bitbucket/birkenfeld",
-    "pkg:bitbucket"
+    "pkg:bitbucket/birkenfeld/pygments-main@main",
+    "pkg:bitbucket/birkenfeld"
   ],
   "parsing_decision_tree": {
     "steps": [
       {
-        "question": "Is there a user/organization component?",
-        "yes": "Extract the user/organization (first component after pkg:bitbucket/)",
-        "no": "Invalid PURL - user/organization is required for bitbucket"
+        "question": "Is there a user/org/project key component?",
+        "yes": "Extract the namespace (first component after pkg:bitbucket/)",
+        "no": "Invalid PURL - namespace is required for bitbucket"
       },
       {
         "question": "Is there a repository name component?",
-        "yes": "Extract the repository name (component after user/)",
+        "yes": "Extract the repository name (component after namespace/)",
         "no": "Invalid PURL - repository name is required for bitbucket"
       },
       {
@@ -101,9 +110,14 @@
         "no": "Invalid PURL - version is required for bitbucket"
       },
       {
-        "question": "Are there qualifiers?",
+        "question": "Are there qualifiers (e.g., repository_url)?",
         "yes": "Parse key=value pairs after ?",
         "no": "No qualifiers present"
+      },
+      {
+        "question": "Is there a subpath (e.g., for a monorepo)?",
+        "yes": "Extract the path segments after the #",
+        "no": "No subpath present"
       }
     ]
   },
@@ -111,69 +125,72 @@
     "ecosystem": "Bitbucket",
     "package_manager": "Git",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:bitbucket/{user}/{repo}@{version}?{qualifiers}",
-    "versioning_system": "Git commit hashes or tags",
-    "repository_model": "Centralized with default at https://bitbucket.org",
-    "self_hosted_support": "Supported via repository_url qualifier"
+    "hierarchical_structure": "pkg:bitbucket/{namespace}/{repo}@{version}?{qualifiers}#subpath",
+    "versioning_system": "Git commit hashes (full or short) or tags.",
+    "repository_model": "Centralized with default at https://bitbucket.org. Also supports self-hosted instances.",
+    "self_hosted_support": "Supported via repository_url qualifier. Self-hosted instances (Server/Data Center) use a Project Key as the namespace."
   },
   "edge_cases": [
     {
-      "case": "Self-hosted Bitbucket instances",
-      "handling": "Use repository_url qualifier to specify non-default Bitbucket server",
-      "purl_impact": "Allows referencing packages from enterprise Bitbucket installations"
+      "case": "Repositories in Bitbucket Server vs. Cloud",
+      "handling": "Cloud instances use a user/organization name as the namespace. Server/Data Center instances use a Project Key as the namespace and require the repository_url qualifier.",
+      "purl_impact": "Allows clear distinction between cloud and self-hosted sources."
+    },
+    {
+      "case": "Packages within a monorepo",
+      "handling": "Use the 'subpath' component to specify the path to the package's root directory within the repository.",
+      "purl_impact": "Essential for uniquely identifying one of many packages in a single repository."
     },
     {
       "case": "Version ambiguity between commit hashes and tags",
-      "handling": "Both commit hashes and tags are valid version identifiers",
-      "purl_impact": "No special distinction needed in PURL format"
-    },
-    {
-      "case": "Repository name with special characters",
-      "handling": "Special characters must be URL-encoded in the PURL",
-      "purl_impact": "Ensures proper parsing of repositories with special characters in name"
+      "handling": "Both commit hashes and tags are valid version identifiers. A tag could potentially look like a short commit hash.",
+      "purl_impact": "No special distinction needed in PURL format, but consumers should be aware of the possibility."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
       "All Bitbucket packages use the default bitbucket.org URL",
-      "Repository names can contain uppercase letters",
+      "Repository names or namespaces can contain uppercase letters",
       "Version must be a commit hash (tags are also valid)",
-      "User/organization names can contain spaces",
-      "Version component is optional"
+      "Branch names are valid versions"
     ],
     "key_facts_to_remember": [
-      "User/organization is required and must be lowercase",
+      "Namespace (user/org/project key) is required and must be lowercase",
       "Repository name is required and must be lowercase",
-      "Version is required and can be a commit hash or tag",
-      "Self-hosted instances use repository_url qualifier",
-      "All components must be URL-safe"
+      "Version is required and must be a commit hash or tag",
+      "For self-hosted Bitbucket Server, the namespace is the Project Key",
+      "Use the 'subpath' component for packages inside a monorepo"
     ],
     "common_mistakes_to_avoid": [
-      "Using uppercase letters in user/organization or repository name",
+      "Using uppercase letters in namespace or repository name",
       "Omitting the required version component",
-      "Confusing with GitHub PURLs",
-      "Forgetting to encode special characters",
-      "Assuming all packages are on bitbucket.org"
+      "Using a mutable branch name like 'main' as the version",
+      "Forgetting the `repository_url` qualifier for self-hosted instances",
+      "Failing to use `subpath` to specify a directory in a monorepo"
     ]
   },
   "examples": [
     {
       "purl": "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
-      "description": "Bitbucket repository with commit hash"
+      "description": "Bitbucket Cloud repository with commit hash"
     },
     {
-      "purl": "pkg:bitbucket/myorg/myproject@v2.1.0",
-      "description": "Bitbucket repository with version tag"
+      "purl": "pkg:bitbucket/atlassian/atlassian-frontend@v104.1.0",
+      "description": "Bitbucket Cloud repository with a version tag"
     },
     {
-      "purl": "pkg:bitbucket/company/internal-repo@abc123def456?repository_url=https://bitbucket.company.com",
-      "description": "Repository from self-hosted Bitbucket instance"
+      "purl": "pkg:bitbucket/atlassian/atlassian-frontend@v104.1.0#packages/analytics",
+      "description": "A specific package within a monorepo on Bitbucket Cloud"
+    },
+    {
+      "purl": "pkg:bitbucket/proj/internal-repo@abcdef123?repository_url=https://bitbucket.company.com",
+      "description": "Repository from a self-hosted Bitbucket Server instance, using a Project Key ('proj') as the namespace."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:bitbucket/Birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
-      "description": "User/organization with uppercase letters - violates lowercase requirement",
+      "description": "Namespace with uppercase letters - violates lowercase requirement",
       "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
     },
     {
@@ -187,14 +204,14 @@
       "violation": "version_definition.requirement=required"
     },
     {
-      "purl": "pkg:bitbucket/birkenfeld",
-      "description": "Missing repository name component - repository name is required for bitbucket",
-      "violation": "name_definition.requirement=required"
+      "purl": "pkg:bitbucket/birkenfeld/pygments-main@main",
+      "description": "Using a mutable branch name as a version, which is not a fixed identifier.",
+      "violation": "version_definition requires an immutable commit or tag"
     },
     {
-      "purl": "pkg:bitbucket",
-      "description": "Missing user/organization component - user/organization is required for bitbucket",
-      "violation": "namespace_definition.requirement=required"
+      "purl": "pkg:bitbucket/proj/internal-repo@abcdef123",
+      "description": "Missing repository_url qualifier for a likely self-hosted instance (using a Project Key as namespace).",
+      "violation": "Self-hosted instances should always include the repository_url qualifier for clarity."
     }
   ],
   "references": [
@@ -204,6 +221,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-22"
   }
 }
