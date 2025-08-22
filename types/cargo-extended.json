@@ -14,50 +14,61 @@
     "supported_repositories": [
       "https://crates.io/"
     ],
-    "note": "Cargo packages are primarily hosted on crates.io"
+    "note": "Cargo packages are primarily hosted on crates.io. Alternative registries can be specified with a 'repository_url' qualifier."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for Cargo packages."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": true,
     "encoding": "verbatim",
     "native_name": "name",
-    "note": "The name is the package name in the Cargo ecosystem."
+    "note": "The name is the package name. It is case-sensitive."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is the package version following SemVer specification."
+    "note": "The version is the package version. It should follow the Semantic Versioning (SemVer) specification."
   },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "The repository URL of the registry where the package is located, if not the default crates.io.",
+      "examples": ["https://some.private.registry/api/v1/crates"]
+    }
+  ],
   "validation_rules": {
     "name": {
-      "format": "rust-package-name",
+      "format_regex": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$",
       "allowed_characters": "alphanumeric, hyphens, underscores",
-      "no_leading_digits": true,
       "no_rust_keywords": true,
-      "examples_valid": ["rand", "serde", "tokio", "actix-web"],
-      "examples_invalid": ["123name", "struct", "package name", "package@name"]
+      "examples_valid": ["rand", "Serde", "tokio", "actix-web", "My-Crate"],
+      "examples_invalid": ["-invalid-start", "struct", "package name", "package@name"]
     },
     "version": {
       "format": "semver",
-      "examples_valid": ["0.7.2", "1.0.0", "2.33.0", "0.3.11"],
+      "examples_valid": ["0.7.2", "1.0.0", "2.33.0", "1.0.0-alpha.1", "0.3.11+build.456"],
       "examples_invalid": ["1.0", "1.0.0.0", "latest", "v1.0.0"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:cargo/{name}@{version}",
-      "description": "Standard Cargo package reference",
+      "description": "Standard Cargo package reference.",
       "example": "pkg:cargo/rand@0.7.2"
+    },
+    {
+      "pattern": "pkg:cargo/{name}@{version}?repository_url={repository_url}",
+      "description": "Cargo package from an alternative registry.",
+      "example": "pkg:cargo/my-internal-crate@1.2.3?repository_url=https://crates.my-company.com/"
     }
   ],
   "anti_patterns": [
     "pkg:cargo/namespace/rand@0.7.2",
-    "pkg:cargo/RAND@0.7.2",
     "pkg:cargo/rand@latest",
     "pkg:cargo/rand",
     "pkg:cargo/"
@@ -92,96 +103,84 @@
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:cargo/{name}@{version}?{qualifiers}",
     "versioning_system": "Semantic Versioning (SemVer)",
-    "naming_convention": "Rust package naming conventions with restrictions"
+    "naming_convention": "Rust package naming conventions with restrictions."
   },
   "edge_cases": [
     {
-      "case": "Names with hyphens and underscores",
-      "handling": "Both hyphens and underscores are allowed in package names",
-      "purl_impact": "No special encoding required for these characters"
+      "case": "Case-sensitive names",
+      "handling": "Package names are case-sensitive. 'My-Crate' and 'my-crate' are considered different packages.",
+      "purl_impact": "Case must be preserved as-is in the PURL name component."
     },
     {
-      "case": "Legacy packages with non-SemVer versions",
-      "handling": "While rare, some legacy packages might not follow strict SemVer",
-      "purl_impact": "Version should still be represented as-is without normalization"
+      "case": "Names with hyphens and underscores",
+      "handling": "Both hyphens and underscores are allowed in package names and are not interchangeable.",
+      "purl_impact": "No special encoding required, but the characters must be preserved."
     },
     {
       "case": "Private registry packages",
-      "handling": "Use repository_url qualifier to specify non-crates.io registry",
-      "purl_impact": "Allows referencing packages from alternative Cargo registries"
+      "handling": "Use the 'repository_url' qualifier to specify a non-crates.io registry.",
+      "purl_impact": "Allows referencing packages from alternative Cargo registries."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Cargo packages have namespaces",
-      "Package names are case-insensitive",
-      "Version can be omitted",
-      "Package names can start with digits",
-      "Package names can be Rust keywords"
+      "Cargo packages have namespaces.",
+      "Package names are case-insensitive.",
+      "Version can be omitted.",
+      "Package names can be Rust keywords."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for cargo packages",
-      "Package name is required and case-sensitive",
-      "Version is required and follows SemVer",
-      "Package names must follow Rust naming conventions",
-      "All characters in package names are allowed as-is (no encoding)"
+      "Namespace is prohibited for cargo packages.",
+      "Package name is required and is case-sensitive.",
+      "Version is required and should follow SemVer.",
+      "The default registry is crates.io but can be overridden with the 'repository_url' qualifier."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Using non-SemVer version strings",
-      "Using uppercase letters in package names (when they should be lowercase)",
-      "Starting package names with digits",
-      "Using Rust keywords as package names"
+      "Adding a namespace component.",
+      "Using non-SemVer version strings.",
+      "Changing the case of a package name.",
+      "Omitting the version component."
     ]
   },
   "examples": [
     {
       "purl": "pkg:cargo/rand@0.7.2",
-      "description": "Random number generation library"
+      "description": "Random number generation library."
     },
     {
       "purl": "pkg:cargo/clap@2.33.0",
-      "description": "Command line argument parser"
+      "description": "Command line argument parser."
     },
     {
       "purl": "pkg:cargo/structopt@0.3.11",
-      "description": "Command line argument parsing library"
+      "description": "Command line argument parsing library."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:cargo/namespace/rand@0.7.2",
-      "description": "Includes namespace component - namespace is prohibited for cargo",
+      "description": "Includes a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
-      "purl": "pkg:cargo/RAND@0.7.2",
-      "description": "Package name with uppercase letters - while technically allowed, convention is lowercase",
-      "violation": "Rust package naming convention recommends lowercase"
-    },
-    {
       "purl": "pkg:cargo/rand@latest",
-      "description": "Non-SemVer version - versions must follow SemVer format",
+      "description": "Non-SemVer version. Versions must follow the SemVer format.",
       "violation": "version_definition requires SemVer format"
     },
     {
       "purl": "pkg:cargo/rand",
-      "description": "Missing version component - version is required for cargo",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:cargo/",
-      "description": "Missing package name component - name is required for cargo",
+      "description": "Missing package name component, which is required.",
       "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "Cargo Book",
-      "url": "https://doc.rust-lang.org/cargo/"
-    },
-    {
-      "title": "Cargo Package Naming Conventions",
+      "title": "The Cargo Book: The Manifest Format",
       "url": "https://doc.rust-lang.org/cargo/reference/manifest.html#the-name-field"
     },
     {
@@ -190,6 +189,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
