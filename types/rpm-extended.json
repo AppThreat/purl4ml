@@ -1,0 +1,235 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/rpm-extended-definition.json",
+  "type": "rpm",
+  "type_name": "RPM",
+  "description": "RPM packages",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no default package repository, this should be implied either from the distro qualifiers key or using a repository base URL as repository_url qualifiers key.",
+    "supported_qualifiers": [
+      "distro",
+      "repository_url"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "vendor",
+    "note": "The namespace is the vendor such as Fedora or OpenSUSE. It is not case sensitive and must be lowercased."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "name",
+    "note": "The name is the RPM name and is case sensitive."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "version-release",
+    "note": "The version is the combined version and release of an RPM."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "epoch",
+      "requirement": "optional",
+      "description": "(optional for RPMs) is a qualifier as its not required for unique identification, but when the epoch exists we strongly encourage using it.",
+      "examples": ["1", "2", "7"]
+    },
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "description": "the qualifiers key for a package architecture.",
+      "examples": ["i386", "i686", "x86_64", "noarch", "src"]
+    },
+    {
+      "key": "distro",
+      "requirement": "optional",
+      "description": "The distribution name",
+      "examples": ["fedora-25", "centos-7", "opensuse-leap-15.2"]
+    },
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Base URL for the package repository",
+      "examples": ["https://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["fedora", "opensuse", "centos"],
+      "examples_invalid": ["Fedora", "OpenSUSE", "centos/"]
+    },
+    "name": {
+      "case_sensitive": true,
+      "examples_valid": ["curl", "httpd", "postgresql-server"],
+      "examples_invalid": ["", "curl/", "curl@name"]
+    },
+    "version": {
+      "format": "rpm-version-release",
+      "examples_valid": ["7.50.3-1.fc25", "4.22.10-1.el6"],
+      "examples_invalid": ["", "latest", "v7.50.3-1.fc25"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:rpm/{vendor}/{name}@{version}?arch={arch}&distro={distro}",
+      "description": "Standard RPM package with architecture and distribution",
+      "example": "pkg:rpm/fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25"
+    },
+    {
+      "pattern": "pkg:rpm/{name}@{version}?epoch={epoch}&arch={arch}&distro={distro}",
+      "description": "RPM package with epoch, architecture, and distribution",
+      "example": "pkg:rpm/centerim@4.22.10-1.el6?arch=i686&epoch=1&distro=fedora-25"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:rpm/Fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+    "pkg:rpm/fedora/Curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+    "pkg:rpm/fedora/curl@7.50.3-1.fc25",
+    "pkg:rpm/fedora/curl",
+    "pkg:rpm/fedora",
+    "pkg:rpm/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a vendor component?",
+        "yes": "Extract the vendor (first component after pkg:rpm/)",
+        "no": "Invalid PURL - vendor is required for rpm"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the package name (component after vendor/)",
+        "no": "Invalid PURL - name is required for rpm"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for rpm"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Linux",
+    "package_manager": "RPM",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:rpm/{vendor}/{name}@{version}?{qualifiers}",
+    "versioning_system": "RPM versioning with version-release format",
+    "architecture_support": "Multiple architectures including source packages",
+    "repository_model": "Distributed with no central default repository"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages with epoch",
+      "handling": "Use epoch qualifier when present for unique identification",
+      "purl_impact": "Ensures proper version comparison when epoch is present"
+    },
+    {
+      "case": "Source packages",
+      "handling": "Use arch=src to identify source RPMs",
+      "purl_impact": "Distinguishes between binary and source packages"
+    },
+    {
+      "case": "Multiple repositories for same vendor",
+      "handling": "Use repository_url qualifier to specify non-default repository",
+      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "RPM packages don't require a vendor",
+      "Package names are case-insensitive",
+      "Version can be omitted",
+      "Architecture qualifier is optional",
+      "There is a default repository URL"
+    ],
+    "key_facts_to_remember": [
+      "Vendor is required and must be lowercase",
+      "Package name is required and case-sensitive",
+      "Version is required and combines version and release",
+      "Epoch qualifier is optional but recommended when present",
+      "Architecture qualifier is typically required"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in vendor name",
+      "Omitting the required version component",
+      "Forgetting to include architecture when relevant",
+      "Treating version and release separately",
+      "Assuming a default repository URL"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:rpm/fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+      "description": "Fedora curl package for i386 architecture"
+    },
+    {
+      "purl": "pkg:rpm/centerim@4.22.10-1.el6?arch=i686&epoch=1&distro=fedora-25",
+      "description": "Centerim package with epoch, architecture, and distribution"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:rpm/Fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+      "description": "Vendor with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:rpm/fedora/Curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+      "description": "Package name with incorrect case - package names are case-sensitive",
+      "violation": "name_definition.case_sensitive=true"
+    },
+    {
+      "purl": "pkg:rpm/fedora/curl@7.50.3-1.fc25",
+      "description": "Missing architecture qualifier - typically required for RPM packages",
+      "violation": "qualifiers_definition.arch is typically required for RPM packages"
+    },
+    {
+      "purl": "pkg:rpm/fedora/curl",
+      "description": "Missing version component - version is required for rpm",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:rpm/fedora",
+      "description": "Missing package name component - name is required for rpm",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:rpm/",
+      "description": "Missing vendor component - vendor is required for rpm",
+      "violation": "namespace_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "RPM Documentation",
+      "url": "https://rpm.org/"
+    },
+    {
+      "title": "Fedora Packaging Guidelines",
+      "url": "https://docs.fedoraproject.org/en-US/packaging-guidelines/"
+    },
+    {
+      "title": "RPM Versioning",
+      "url": "https://rpm.org/user_doc/dependencies.html"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

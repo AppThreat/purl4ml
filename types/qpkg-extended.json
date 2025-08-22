@@ -1,0 +1,199 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/qpkg-extended-definition.json",
+  "type": "qpkg",
+  "type_name": "QNX package",
+  "description": "QNX packages",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no default package repository, this should be implied either from the namespace or using a repository base URL as repository_url qualifiers key.",
+    "supported_qualifiers": [
+      "repository_url"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "vendor",
+    "note": "The namespace is the vendor of the package. It is not case sensitive and must be lowercased."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "name",
+    "note": "The name is the package name."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the package version."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Base URL for the package repository",
+      "examples": ["https://qnx-repository.example.com/"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["blackberry", "qnx", "vendor"],
+      "examples_invalid": ["BlackBerry", "QNX", "vendor/"]
+    },
+    "name": {
+      "examples_valid": ["com.qnx.sdp", "com.qnx.qnx710.foo.bar.qux"],
+      "examples_invalid": ["", "com.qnx.sdp/", "com.qnx.sdp@name"]
+    },
+    "version": {
+      "format": "qnx-version",
+      "examples_valid": ["7.0.0.SGA201702151847", "0.0.4.01449T202205040833L"],
+      "examples_invalid": ["", "latest", "v7.0.0.SGA201702151847"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:qpkg/{vendor}/{name}@{version}",
+      "description": "Standard QNX package reference",
+      "example": "pkg:qpkg/blackberry/com.qnx.sdp@7.0.0.SGA201702151847"
+    },
+    {
+      "pattern": "pkg:qpkg/{vendor}/{name}@{version}?repository_url={url}",
+      "description": "QNX package with custom repository",
+      "example": "pkg:qpkg/blackberry/com.qnx.qnx710.foo.bar.qux@0.0.4.01449T202205040833L?repository_url=https://qnx-repository.example.com/"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:qpkg/BlackBerry/com.qnx.sdp@7.0.0.SGA201702151847",
+    "pkg:qpkg/blackberry/com.qnx.sdp",
+    "pkg:qpkg/blackberry/com.qnx.sdp@",
+    "pkg:qpkg/blackberry/",
+    "pkg:qpkg/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a vendor component?",
+        "yes": "Extract the vendor (first component after pkg:qpkg/)",
+        "no": "Invalid PURL - vendor is required for qpkg"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the package name (component after vendor/)",
+        "no": "Invalid PURL - name is required for qpkg"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for qpkg"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "QNX",
+    "package_manager": "QNX Software Manager",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:qpkg/{vendor}/{name}@{version}?{qualifiers}",
+    "versioning_system": "QNX-specific versioning with timestamps",
+    "naming_convention": "Dot-separated package names with vendor prefix",
+    "repository_model": "Distributed with no central default repository"
+  },
+  "edge_cases": [
+    {
+      "case": "Version with timestamps",
+      "handling": "Versions include timestamps and build identifiers",
+      "purl_impact": "Preserves complete version information including timestamps"
+    },
+    {
+      "case": "Multiple repositories for same vendor",
+      "handling": "Use repository_url qualifier to specify non-default repository",
+      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "QNX packages don't require a vendor",
+      "Package names can contain uppercase letters",
+      "Version can be omitted",
+      "There is a default repository URL",
+      "All packages follow standard versioning"
+    ],
+    "key_facts_to_remember": [
+      "Vendor is required and must be lowercase",
+      "Package name is required and uses dot notation",
+      "Version is required and includes timestamps",
+      "Repository URL can be specified as a qualifier",
+      "Version format is specific to QNX"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in vendor name",
+      "Omitting the required version component",
+      "Forgetting to include the vendor component",
+      "Using standard version formats instead of QNX format",
+      "Assuming a default repository URL"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:qpkg/blackberry/com.qnx.sdp@7.0.0.SGA201702151847",
+      "description": "QNX SDP package from BlackBerry"
+    },
+    {
+      "purl": "pkg:qpkg/blackberry/com.qnx.qnx710.foo.bar.qux@0.0.4.01449T202205040833L",
+      "description": "QNX package with complex name and timestamp"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:qpkg/BlackBerry/com.qnx.sdp@7.0.0.SGA201702151847",
+      "description": "Vendor with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:qpkg/blackberry/com.qnx.sdp",
+      "description": "Missing version component - version is required for qpkg",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:qpkg/blackberry/com.qnx.sdp@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:qpkg/blackberry/",
+      "description": "Missing package name component - name is required for qpkg",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:qpkg/",
+      "description": "Missing vendor component - vendor is required for qpkg",
+      "violation": "namespace_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "QNX Documentation",
+      "url": "https://www.qnx.com/developers/docs/"
+    },
+    {
+      "title": "QNX Software Manager",
+      "url": "https://www.qnx.com/developers/articles/rel_660_660_660.html"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

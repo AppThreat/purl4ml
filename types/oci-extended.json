@@ -1,0 +1,229 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/oci-extended-definition.json",
+  "type": "oci",
+  "type_name": "OCI image",
+  "description": "For artifacts stored in registries that conform to the OCI Distribution Specification https://github.com/opencontainers/distribution-spec including container images built by Docker and others",
+  "uri_compliance": {
+    "name_encoding": "lowercase",
+    "version_encoding": "lowercase"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no canonical package repository for OCI artifacts. Therefore oci purls must be registry agnostic by default. To specify the repository, provide a repository_url value.",
+    "supported_qualifiers": [
+      "repository_url"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "OCI purls do not contain a namespace, although, repository_url may contain a namespace as part of the physical location of the package."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "image name",
+    "note": "The name is not case sensitive and must be lowercased. The name is the last fragment of the repository name. For example if the repository name is library/debian then the name is debian."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "digest",
+    "note": "The version is the sha256:hex_encoded_lowercase_digest of the artifact and is required to uniquely identify the artifact."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "description": "key for a package architecture, when relevant.",
+      "examples": ["amd64", "arm64", "s390x"]
+    },
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "A repository URL where the artifact may be found, but not intended as the only location. This value is encouraged to identify a location the content may be fetched.",
+      "examples": ["docker.io/library/debian", "ghcr.io/debian", "gcr.io/distroless/static"]
+    },
+    {
+      "key": "tag",
+      "requirement": "optional",
+      "description": "artifact tag that may have been associated with the digest at the time.",
+      "examples": ["latest", "bullseye", "v1"]
+    }
+  ],
+  "validation_rules": {
+    "name": {
+      "lowercase_required": true,
+      "examples_valid": ["debian", "static", "hello-wasm"],
+      "examples_invalid": ["Debian", "static image", "hello@wasm"]
+    },
+    "version": {
+      "format": "sha256-digest",
+      "lowercase_required": true,
+      "examples_valid": ["sha256:244fd47e07d10", "sha256:abc123def456"],
+      "examples_invalid": ["", "latest", "sha256:244FD47E07D10"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:oci/{name}@{digest}?repository_url={url}&arch={arch}&tag={tag}",
+      "description": "OCI image with full qualifiers",
+      "example": "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest"
+    },
+    {
+      "pattern": "pkg:oci/{name}@{digest}?repository_url={url}&tag={tag}",
+      "description": "OCI image with repository and tag",
+      "example": "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye"
+    },
+    {
+      "pattern": "pkg:oci/{name}@{digest}?repository_url={url}&tag={tag}",
+      "description": "OCI image from Google Container Registry",
+      "example": "pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest"
+    },
+    {
+      "pattern": "pkg:oci/{name}@{digest}?tag={tag}",
+      "description": "OCI image with tag only",
+      "example": "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:oci/namespace/debian@sha256:244fd47e07d10",
+    "pkg:oci/Debian@sha256:244fd47e07d10",
+    "pkg:oci/debian@latest",
+    "pkg:oci/debian@sha256:244FD47E07D10",
+    "pkg:oci/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for oci",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there an image name component?",
+        "yes": "Extract the name (component after pkg:oci/)",
+        "no": "Invalid PURL - name is required for oci"
+      },
+      {
+        "question": "Is there a digest component?",
+        "yes": "Extract everything after @ as digest",
+        "no": "Invalid PURL - digest is required for oci"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Container",
+    "package_manager": "OCI",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:oci/{name}@{digest}?{qualifiers}",
+    "versioning_system": "SHA256 digests",
+    "registry_model": "Registry agnostic by default, repository_url qualifier used for specific registries",
+    "architecture_support": "Multiple architectures via arch qualifier"
+  },
+  "edge_cases": [
+    {
+      "case": "Images from multiple registries",
+      "handling": "Use repository_url qualifier to specify registry",
+      "purl_impact": "Enables referencing images from any OCI-compliant registry"
+    },
+    {
+      "case": "Multi-architecture images",
+      "handling": "Use arch qualifier to specify architecture",
+      "purl_impact": "Allows disambiguation between architecture variants"
+    },
+    {
+      "case": "Digest encoding in URLs",
+      "handling": "Colon in SHA256 digest must be percent-encoded in URLs",
+      "purl_impact": "Ensures proper URL formatting for digests"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "OCI images have namespaces",
+      "Image names are case-sensitive",
+      "Version can be a tag (must be a digest)",
+      "There is a default registry",
+      "Digest can be uppercase"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for oci images",
+      "Image name is required and must be lowercase",
+      "Version is required and must be a SHA256 digest (lowercase)",
+      "Repository_url qualifier is used to specify registry",
+      "Tag qualifier can be used to indicate associated tag"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using uppercase letters in image names or digests",
+      "Using a tag as version (must use digest)",
+      "Forgetting to percent-encode colon in SHA256 digests",
+      "Assuming a default registry"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
+      "description": "Debian image from Docker Hub with full qualifiers"
+    },
+    {
+      "purl": "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye",
+      "description": "Debian image from GitHub Container Registry"
+    },
+    {
+      "purl": "pkg:oci/static@sha256%3A244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest",
+      "description": "Static image from Google Container Registry"
+    },
+    {
+      "purl": "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
+      "description": "Hello Wasm image with tag only"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:oci/namespace/debian@sha256:244fd47e07d10",
+      "description": "Includes namespace component - namespace is prohibited for oci",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:oci/Debian@sha256:244fd47e07d10",
+      "description": "Image name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:oci/debian@latest",
+      "description": "Tag used as version - version must be a SHA256 digest",
+      "violation": "version_definition requires a SHA256 digest"
+    },
+    {
+      "purl": "pkg:oci/debian@sha256:244FD47E07D10",
+      "description": "Digest with uppercase letters - digest must be lowercase",
+      "violation": "version_definition.case_sensitive=false and version_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:oci/",
+      "description": "Missing image name component - name is required for oci",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "OCI Distribution Specification",
+      "url": "https://github.com/opencontainers/distribution-spec"
+    },
+    {
+      "title": "Open Container Initiative",
+      "url": "https://opencontainers.org/"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

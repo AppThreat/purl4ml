@@ -1,0 +1,229 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/luarocks-extended-definition.json",
+  "type": "luarocks",
+  "type_name": "LuaRocks",
+  "description": "Lua packages installed with LuaRocks",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "lowercase",
+    "version_encoding": "lowercase"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://luarocks.org",
+    "supported_repositories": [
+      "https://luarocks.org"
+    ],
+    "note": "LuaRocks packages are primarily hosted on the official LuaRocks server"
+  },
+  "namespace_definition": {
+    "requirement": "optional",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "user manifest",
+    "note": "The user manifest under which the package is registered. If not given, the root manifest is assumed. It is case insensitive, but lowercase is encouraged since namespaces are normalized to ASCII lowercase."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "name",
+    "note": "The LuaRocks package name. It is case insensitive, but lowercase is encouraged since package names are normalized to ASCII lowercase."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "lowercase",
+    "native_name": "full package version, including module version and rockspec revision",
+    "note": "The full LuaRocks package version, including module version and rockspec revision. It is case sensitive, and lowercase must be used to avoid compatibility issues with older LuaRocks versions. The full version number is required to uniquely identify a version."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "The LuaRocks rocks server to be used; useful in case a private server is used (optional). If omitted, https://luarocks.org as default server is assumed.",
+      "examples": ["https://luarocks.org", "https://example.com/private_rocks_server/"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["hisham", "username", "organization"],
+      "examples_invalid": ["Hisham", "user name", "user@name"]
+    },
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["luasocket", "luafilesystem", "packagename"],
+      "examples_invalid": ["LuaSocket", "lua file system", "package@name"]
+    },
+    "version": {
+      "format": "luarocks-version",
+      "includes_revision": true,
+      "examples_valid": ["3.1.0-1", "1.8.0-1", "0.1.0-1"],
+      "examples_invalid": ["3.1.0", "latest", "3.1.0-1-1"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:luarocks/{name}@{version}",
+      "description": "Standard LuaRocks package without namespace",
+      "example": "pkg:luarocks/luasocket@3.1.0-1"
+    },
+    {
+      "pattern": "pkg:luarocks/{namespace}/{name}@{version}",
+      "description": "LuaRocks package with user manifest namespace",
+      "example": "pkg:luarocks/hisham/luafilesystem@1.8.0-1"
+    },
+    {
+      "pattern": "pkg:luarocks/{namespace}/{name}@{version}?repository_url={url}",
+      "description": "LuaRocks package from private server",
+      "example": "pkg:luarocks/username/packagename@0.1.0-1?repository_url=https://example.com/private_rocks_server/"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:luarocks/Hisham/luafilesystem@1.8.0-1",
+    "pkg:luarocks/hisham/LuaFileSystem@1.8.0-1",
+    "pkg:luarocks/hisham/luafilesystem@1.8.0",
+    "pkg:luarocks/hisham/luafilesystem@latest",
+    "pkg:luarocks/hisham/luafilesystem@1.8.0-1-1",
+    "pkg:luarocks/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:luarocks/)",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the package name (component after namespace/ or after pkg:luarocks/ if no namespace)",
+        "no": "Invalid PURL - name is required for luarocks"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for luarocks"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Lua",
+    "package_manager": "LuaRocks",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:luarocks/[{namespace}/]{name}@{version}?{qualifiers}",
+    "versioning_system": "LuaRocks versioning with module version and rockspec revision",
+    "naming_convention": "Lowercase for all components",
+    "repository_model": "Centralized with luarocks.org as default, supports private servers"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages without namespace",
+      "handling": "Namespace is optional and can be omitted",
+      "purl_impact": "Simplifies PURLs for packages in the root manifest"
+    },
+    {
+      "case": "Case sensitivity in version",
+      "handling": "Version is case-sensitive but must be lowercase to avoid compatibility issues",
+      "purl_impact": "Ensures compatibility with older LuaRocks versions"
+    },
+    {
+      "case": "Private LuaRocks servers",
+      "handling": "Use repository_url qualifier to specify non-default server",
+      "purl_impact": "Allows referencing packages from private LuaRocks repositories"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "All LuaRocks packages have a namespace",
+      "Package names can contain uppercase letters",
+      "Version can be omitted",
+      "Version format doesn't include revision",
+      "All packages use the default LuaRocks server"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is optional and represents the user manifest",
+      "Package name is required and must be lowercase",
+      "Version is required and includes module version and rockspec revision",
+      "All components should be lowercase to ensure compatibility",
+      "Private servers use repository_url qualifier"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in any component",
+      "Omitting the required version component",
+      "Forgetting the rockspec revision in version",
+      "Using invalid characters in package names",
+      "Assuming all packages are on the default server"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:luarocks/luasocket@3.1.0-1",
+      "description": "LuaSocket library without namespace"
+    },
+    {
+      "purl": "pkg:luarocks/hisham/luafilesystem@1.8.0-1",
+      "description": "LuaFileSystem library with user manifest namespace"
+    },
+    {
+      "purl": "pkg:luarocks/username/packagename@0.1.0-1?repository_url=https://example.com/private_rocks_server/",
+      "description": "Package from private LuaRocks server"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:luarocks/Hisham/luafilesystem@1.8.0-1",
+      "description": "Namespace with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:luarocks/hisham/LuaFileSystem@1.8.0-1",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:luarocks/hisham/luafilesystem@1.8.0",
+      "description": "Missing rockspec revision in version - version must include revision",
+      "violation": "version_definition requires full version including module version and rockspec revision"
+    },
+    {
+      "purl": "pkg:luarocks/hisham/luafilesystem@latest",
+      "description": "Non-specific version - 'latest' is not a valid LuaRocks version",
+      "violation": "version_definition requires a valid version with revision"
+    },
+    {
+      "purl": "pkg:luarocks/hisham/luafilesystem@1.8.0-1-1",
+      "description": "Invalid version format - version should have only one hyphen separator",
+      "violation": "version_definition requires valid LuaRocks version format"
+    },
+    {
+      "purl": "pkg:luarocks/",
+      "description": "Missing package name component - name is required for luarocks",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "LuaRocks Documentation",
+      "url": "https://luarocks.org/"
+    },
+    {
+      "title": "LuaRocks User Manual",
+      "url": "https://github.com/luarocks/luarocks/wiki/User_Manual"
+    },
+    {
+      "title": "LuaRocks Rockspec Format",
+      "url": "https://github.com/luarocks/luarocks/wiki/Rockspec-format"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

@@ -1,0 +1,212 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/swift-extended-definition.json",
+  "type": "swift",
+  "type_name": "Swift packages",
+  "description": "Swift packages",
+  "uri_compliance": {
+    "namespace_encoding": "verbatim",
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no default package repository, this should be implied from namespace.",
+    "supported_qualifiers": [
+      "repository_url"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "source host and user/organization",
+    "note": "The namespace is source host and user/organization and is required."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "repository name",
+    "note": "The name is the repository name."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "case_sensitive": true,
+    "encoding": "verbatim",
+    "native_name": "package version",
+    "note": "The version is the package version."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Custom repository URL for Swift packages",
+      "examples": ["https://github.com", "https://gitlab.com"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "case_sensitive": true,
+      "examples_valid": ["github.com", "gitlab.com", "bitbucket.org"],
+      "examples_invalid": ["", "github.com/", "github.com@user"]
+    },
+    "name": {
+      "case_sensitive": true,
+      "examples_valid": ["Alamofire", "RxFlow", "SwiftPM"],
+      "examples_invalid": ["", "Alamofire/", "Alamofire@repo"]
+    },
+    "version": {
+      "case_sensitive": true,
+      "examples_valid": ["5.4.3", "2.12.4", "1.0.0-beta.1"],
+      "examples_invalid": ["", "latest", "v5.4.3"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:swift/{namespace}/{name}@{version}",
+      "description": "Standard Swift package reference",
+      "example": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3"
+    },
+    {
+      "pattern": "pkg:swift/{namespace}/{name}@{version}?repository_url={url}",
+      "description": "Swift package with custom repository URL",
+      "example": "pkg:swift/gitlab.com/RxSwiftCommunity/RxFlow@2.12.4?repository_url=https://gitlab.com"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:swift/github.com/alamofire/alamofire@5.4.3",
+    "pkg:swift/github.com/Alamofire/Alamofire",
+    "pkg:swift/github.com/Alamofire/Alamofire@",
+    "pkg:swift/github.com/Alamofire",
+    "pkg:swift/github.com",
+    "pkg:swift/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:swift/)",
+        "no": "Invalid PURL - namespace is required for swift"
+      },
+      {
+        "question": "Is there a repository name component?",
+        "yes": "Extract the repository name (component after namespace/)",
+        "no": "Invalid PURL - name is required for swift"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for swift"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Swift",
+    "package_manager": "Swift Package Manager",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:swift/{namespace}/{name}@{version}?{qualifiers}",
+    "versioning_system": "Semantic Versioning with pre-release support",
+    "repository_model": "Distributed with namespace indicating source host",
+    "naming_convention": "Case-sensitive repository names"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages from different Git hosts",
+      "handling": "Namespace indicates the Git host (github.com, gitlab.com, etc.)",
+      "purl_impact": "Enables referencing packages from any Git hosting service"
+    },
+    {
+      "case": "Pre-release versions",
+      "handling": "Versions can include pre-release identifiers",
+      "purl_impact": "Supports development and beta versions"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "Swift packages don't require a namespace",
+      "Repository names are case-insensitive",
+      "Version can be omitted",
+      "All packages are on GitHub",
+      "There is a default repository URL"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is required and represents the source host",
+      "Repository name is required and case-sensitive",
+      "Version is required and case-sensitive",
+      "Namespace typically includes the Git host and user/organization",
+      "Custom repositories can be specified with repository_url qualifier"
+    ],
+    "common_mistakes_to_avoid": [
+      "Omitting any of the required components",
+      "Changing case of namespace or repository name",
+      "Using 'latest' as version",
+      "Assuming all packages are on GitHub",
+      "Forgetting that namespace includes the host"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+      "description": "Alamofire HTTP networking library from GitHub"
+    },
+    {
+      "purl": "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+      "description": "RxFlow reactive programming library from GitHub"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:swift/github.com/alamofire/alamofire@5.4.3",
+      "description": "Repository name with incorrect case - repository names are case-sensitive",
+      "violation": "name_definition.case_sensitive=true"
+    },
+    {
+      "purl": "pkg:swift/github.com/Alamofire/Alamofire",
+      "description": "Missing version component - version is required for swift",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:swift/github.com/Alamofire/Alamofire@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:swift/github.com/Alamofire",
+      "description": "Missing repository name component - name is required for swift",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:swift/github.com",
+      "description": "Missing repository name component - name is required for swift",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:swift/",
+      "description": "Missing namespace component - namespace is required for swift",
+      "violation": "namespace_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Swift Package Manager",
+      "url": "https://www.swift.org/package-manager/"
+    },
+    {
+      "title": "Creating Swift Packages",
+      "url": "https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html"
+    },
+    {
+      "title": "Swift Package Dependencies",
+      "url": "https://docs.swift.org/package-manager/dependencies.html"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

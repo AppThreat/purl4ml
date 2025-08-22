@@ -1,0 +1,184 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/pub-extended-definition.json",
+  "type": "pub",
+  "type_name": "Pub",
+  "description": "Dart and Flutter pub packages",
+  "uri_compliance": {
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://pub.dartlang.org",
+    "supported_repositories": [
+      "https://pub.dartlang.org"
+    ],
+    "note": "Pub packages are hosted on the official Dart package repository"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "there is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "name",
+    "permitted_characters": "^[a-z0-9_]",
+    "normalization_rules": [
+      "Replace non-[a-z] letters, non-[0-9] digits with underscore _"
+    ],
+    "note": "Pub normalizes all package names to be lowercase and using underscores. The only allowed characters are [a-z0-9_]. More information on pub naming and versioning is available in the pubspec documentation https://dart.dev/tools/pub/pubspec"
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the package version following SemVer."
+  },
+  "validation_rules": {
+    "name": {
+      "lowercase_required": true,
+      "allowed_characters": "^[a-z0-9_]",
+      "examples_valid": ["characters", "flutter", "http"],
+      "examples_invalid": ["Characters", "package-name", "package@name"]
+    },
+    "version": {
+      "format": "semver",
+      "examples_valid": ["1.2.0", "0.0.0", "2.1.3"],
+      "examples_invalid": ["", "latest", "v1.2.0"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:pub/{name}@{version}",
+      "description": "Standard Pub package reference",
+      "example": "pkg:pub/characters@1.2.0"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:pub/namespace/characters@1.2.0",
+    "pkg:pub/Characters@1.2.0",
+    "pkg:pub/characters",
+    "pkg:pub/characters@",
+    "pkg:pub/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for pub",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the name (component after pkg:pub/)",
+        "no": "Invalid PURL - name is required for pub"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for pub"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Dart/Flutter",
+    "package_manager": "Pub",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:pub/{name}@{version}?{qualifiers}",
+    "versioning_system": "Semantic Versioning (SemVer)",
+    "naming_convention": "Lowercase with underscores, only [a-z0-9_] allowed",
+    "repository_model": "Centralized with pub.dartlang.org as default"
+  },
+  "edge_cases": [
+    {
+      "case": "Package names with special characters",
+      "handling": "Special characters are normalized to underscores",
+      "purl_impact": "Ensures consistent naming despite input variations"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "Pub packages have namespaces",
+      "Package names can contain uppercase letters",
+      "Version can be omitted",
+      "Package names can contain hyphens or special characters",
+      "All packages follow non-SemVer versioning"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for pub packages",
+      "Package name is required and must be lowercase with only [a-z0-9_]",
+      "Version is required and follows SemVer",
+      "Special characters in names are normalized to underscores",
+      "Package names are normalized to be consistent"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using uppercase letters in package names",
+      "Using hyphens or special characters in package names",
+      "Omitting the required version component",
+      "Using non-SemVer version strings"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:pub/characters@1.2.0",
+      "description": "Characters package for Dart"
+    },
+    {
+      "purl": "pkg:pub/flutter@0.0.0",
+      "description": "Flutter framework package"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:pub/namespace/characters@1.2.0",
+      "description": "Includes namespace component - namespace is prohibited for pub",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:pub/Characters@1.2.0",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:pub/characters",
+      "description": "Missing version component - version is required for pub",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:pub/characters@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:pub/",
+      "description": "Missing package name component - name is required for pub",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Pub Package Manager Documentation",
+      "url": "https://dart.dev/tools/pub"
+    },
+    {
+      "title": "Pubspec Documentation",
+      "url": "https://dart.dev/tools/pub/pubspec"
+    },
+    {
+      "title": "Pub Package Naming Conventions",
+      "url": "https://dart.dev/guides/libraries/create-library-packages#naming-a-package"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

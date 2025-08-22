@@ -1,0 +1,217 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/pypi-extended-definition.json",
+  "type": "pypi",
+  "type_name": "PyPI",
+  "description": "Python packages",
+  "uri_compliance": {
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://pypi.org",
+    "supported_repositories": [
+      "https://pypi.org",
+      "https://pypi.python.org"
+    ],
+    "note": "Previously https://pypi.python.org"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "there is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "name",
+    "normalization_rules": [
+      "Replace underscore _ with dash -",
+      "Replace dot . with underscore _ when used in distribution (sdist, wheel) names"
+    ],
+    "note": "PyPI treats - and _ as the same character and is not case sensitive. Therefore a PyPI package name must be lowercased and underscore _ replaced with a dash -. Note that PyPI itself is preserving the case of package names. When used in distribution and wheel names, the dot . is replaced with an underscore _"
+  },
+  "version_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the package version."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "file_name",
+      "requirement": "optional",
+      "description": "The file_name qualifier selects a particular distribution file (case-sensitive). For naming convention, see the Python Packaging User Guide on source distributions https://packaging.python.org/en/latest/specifications/source-distribution-format/#source-distribution-file-name and on binary distributions https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention and the rules for platform compatibility tags https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/",
+      "examples": ["Django-1.11.1.tar.gz", "Django-1.11.1-py2.py3-none-any.whl"]
+    }
+  ],
+  "validation_rules": {
+    "name": {
+      "lowercase_required": true,
+      "dash_underscore_equivalent": true,
+      "examples_valid": ["django", "django-allauth", "requests"],
+      "examples_invalid": ["Django", "django@allauth", "django allauth"]
+    },
+    "version": {
+      "format": "pypi-version",
+      "examples_valid": ["1.11.1", "12.23", "2.0.1"],
+      "examples_invalid": ["", "latest", "v1.11.1"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:pypi/{name}@{version}",
+      "description": "Standard PyPI package reference",
+      "example": "pkg:pypi/django@1.11.1"
+    },
+    {
+      "pattern": "pkg:pypi/{name}@{version}?file_name={filename}",
+      "description": "PyPI package with specific distribution file",
+      "example": "pkg:pypi/django@1.11.1?filename=Django-1.11.1.tar.gz"
+    },
+    {
+      "pattern": "pkg:pypi/{name}@{version}?file_name={wheelname}",
+      "description": "PyPI package with specific wheel file",
+      "example": "pkg:pypi/django@1.11.1?filename=Django-1.11.1-py2.py3-none-any.whl"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:pypi/namespace/django@1.11.1",
+    "pkg:pypi/Django@1.11.1",
+    "pkg:pypi/django",
+    "pkg:pypi/django@",
+    "pkg:pypi/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for pypi",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the name (component after pkg:pypi/)",
+        "no": "Invalid PURL - name is required for pypi"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for pypi"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Python",
+    "package_manager": "PyPI",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:pypi/{name}@{version}?{qualifiers}",
+    "versioning_system": "Python versioning",
+    "naming_convention": "Lowercase with dashes and underscores treated as equivalent",
+    "repository_model": "Centralized with PyPI as default"
+  },
+  "edge_cases": [
+    {
+      "case": "Package names with dashes and underscores",
+      "handling": "Dashes and underscores are treated as equivalent and normalized to dashes",
+      "purl_impact": "Ensures consistent naming despite dash/underscore variations"
+    },
+    {
+      "case": "Specific distribution files",
+      "handling": "Use file_name qualifier to specify source distribution or wheel",
+      "purl_impact": "Enables precise reference to specific distribution formats"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "PyPI packages have namespaces",
+      "Package names are case-sensitive",
+      "Version can be omitted",
+      "Package names can contain arbitrary characters",
+      "Dashes and underscores are treated differently"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for pypi packages",
+      "Package name is required and must be lowercase",
+      "Version is required",
+      "Dashes and underscores are treated as equivalent and normalized to dashes",
+      "file_name qualifier can specify distribution files"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using uppercase letters in package names",
+      "Omitting the required version component",
+      "Treating dashes and underscores differently",
+      "Using invalid characters in package names"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:pypi/django@1.11.1",
+      "description": "Django web framework"
+    },
+    {
+      "purl": "pkg:pypi/django@1.11.1?filename=Django-1.11.1.tar.gz",
+      "description": "Django source distribution"
+    },
+    {
+      "purl": "pkg:pypi/django@1.11.1?filename=Django-1.11.1-py2.py3-none-any.whl",
+      "description": "Django wheel distribution"
+    },
+    {
+      "purl": "pkg:pypi/django-allauth@12.23",
+      "description": "Django authentication package with dash in name"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:pypi/namespace/django@1.11.1",
+      "description": "Includes namespace component - namespace is prohibited for pypi",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:pypi/Django@1.11.1",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:pypi/django",
+      "description": "Missing version component - version is required for pypi",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:pypi/django@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:pypi/",
+      "description": "Missing package name component - name is required for pypi",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "PyPI Documentation",
+      "url": "https://pypi.org/"
+    },
+    {
+      "title": "Python Packaging User Guide",
+      "url": "https://packaging.python.org/"
+    },
+    {
+      "title": "PyPI Package Name Normalization",
+      "url": "https://www.python.org/dev/peps/pep-0503/#normalized-names"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}
