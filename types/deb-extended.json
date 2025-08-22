@@ -11,7 +11,7 @@
   },
   "repository": {
     "use_repository": true,
-    "note": "There is no default package repository, this should be implied either from the distro qualifiers key or using a base url as a repository_url qualifiers key.",
+    "note": "There is no default package repository. The repository can be specified via the 'distro' or 'repository_url' qualifiers.",
     "supported_qualifiers": [
       "distro",
       "repository_url"
@@ -22,38 +22,38 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "vendor",
-    "note": "The namespace is the \"vendor\" name such as \"debian\" or \"ubuntu\". It is not case sensitive and must be lowercased."
+    "note": "The namespace is the 'vendor' name such as 'debian' or 'ubuntu'. It must be lowercased."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is not case sensitive and must be lowercased."
+    "note": "The package name. It must be lowercased."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is the version of the binary (or source) package."
+    "note": "The version of the binary (or source) package."
   },
   "qualifiers_definition": [
     {
       "key": "arch",
       "requirement": "optional",
-      "description": "arch is the qualifiers key for a package architecture. The special value arch=source identifies a Debian source package that usually consists of a Debian Source control file (.dsc) and corresponding upstream and Debian sources. The dpkg-query command can print the name and version of the corresponding source package of a binary package, e.g. dpkg-query -f ${source:Package} ${source:Version} -W <binary package name>",
+      "description": "The package architecture. The special value 'source' identifies a Debian source package. While optional, it is strongly recommended for disambiguating binary packages.",
       "examples": ["i386", "amd64", "arm64", "source", "all"]
     },
     {
       "key": "distro",
       "requirement": "optional",
-      "description": "The distribution name",
+      "description": "The distribution name, codename, or suite.",
       "examples": ["jessie", "stretch", "buster", "bullseye", "focal", "jammy"]
     },
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Base URL for the package repository",
+      "description": "Base URL for the package repository.",
       "examples": ["http://deb.debian.org/debian/", "http://archive.ubuntu.com/ubuntu/"]
     }
   ],
@@ -61,50 +61,38 @@
     "namespace": {
       "lowercase_required": true,
       "examples_valid": ["debian", "ubuntu", "mint"],
-      "examples_invalid": ["Debian", "Ubuntu", "DEBIAN"]
+      "examples_invalid": ["Debian", "Ubuntu"]
     },
     "name": {
       "lowercase_required": true,
       "no_spaces": true,
-      "examples_valid": ["curl", "dpkg", "attr"],
-      "examples_invalid": ["Curl", "dpkg-dev", "package name"]
+      "examples_valid": ["curl", "dpkg", "attr", "dpkg-dev", "libssl1.1"],
+      "examples_invalid": ["Curl", "package name"]
     },
     "version": {
       "format": "debian-version",
       "supports_epoch": true,
       "supports_revision": true,
       "examples_valid": ["7.50.3-1", "1.19.0.4", "1:2.4.47-2", "1:2.4.47-2+b1"],
-      "examples_invalid": ["", "latest", "v1.0.0"]
+      "examples_invalid": ["latest", "v1.0.0"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:deb/{vendor}/{name}@{version}?arch={arch}&distro={distro}",
-      "description": "Standard Debian package with architecture and distribution",
+      "description": "Debian package with architecture and distribution.",
       "example": "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie"
     },
     {
-      "pattern": "pkg:deb/{vendor}/{name}@{version}?arch={arch}",
-      "description": "Package with architecture but without distribution",
-      "example": "pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64"
-    },
-    {
-      "pattern": "pkg:deb/{vendor}/{name}@{epoch}:{version}-{revision}?arch=source",
-      "description": "Source package with epoch and revision",
+      "pattern": "pkg:deb/{vendor}/{name}@{version}?arch=source",
+      "description": "Source package identified by its architecture.",
       "example": "pkg:deb/debian/attr@1:2.4.47-2?arch=source"
-    },
-    {
-      "pattern": "pkg:deb/{vendor}/{name}@{epoch}:{version}-{revision}%2B{binrevision}?arch={arch}",
-      "description": "Binary package with epoch, revision, and binary revision",
-      "example": "pkg:deb/debian/attr@1:2.4.47-2%2Bb1?arch=amd64"
     }
   ],
   "anti_patterns": [
     "pkg:deb/Debian/curl@7.50.3-1?arch=i386&distro=jessie",
     "pkg:deb/debian/Curl@7.50.3-1?arch=i386&distro=jessie",
-    "pkg:deb/debian/curl@7.50.3-1",
     "pkg:deb/debian/curl",
-    "pkg:deb/debian",
     "pkg:deb"
   ],
   "parsing_decision_tree": {
@@ -112,27 +100,17 @@
       {
         "question": "Is there a vendor/namespace component?",
         "yes": "Extract the vendor (first component after pkg:deb/)",
-        "no": "Invalid PURL - vendor is required for deb"
+        "no": "Invalid PURL - vendor is required"
       },
       {
         "question": "Is there a package name component?",
         "yes": "Extract the package name (component after vendor/)",
-        "no": "Invalid PURL - package name is required for deb"
+        "no": "Invalid PURL - package name is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for deb"
-      },
-      {
-        "question": "Does the version contain an epoch?",
-        "yes": "Parse epoch as the number before the first colon",
-        "no": "Proceed with version parsing"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "no": "Invalid PURL - version is required"
       }
     ]
   },
@@ -141,124 +119,94 @@
     "package_manager": "dpkg/apt",
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:deb/{vendor}/{name}@{version}?{qualifiers}",
-    "versioning_system": "Debian versioning with epoch and revision support",
-    "architecture_support": "Multiple architectures including source packages",
-    "repository_model": "Distributed with no central default repository"
+    "versioning_system": "Debian versioning with epoch and revision support.",
+    "architecture_support": "Multiple architectures, including 'source' and 'all'.",
+    "repository_model": "Distributed with no central default repository."
   },
   "edge_cases": [
     {
       "case": "Packages with epoch in version",
-      "handling": "Epoch is represented as a number followed by colon at the beginning of version",
-      "purl_impact": "Epoch must be preserved in PURL as it affects version comparison"
+      "handling": "Epoch is represented as a number followed by a colon at the beginning of the version string.",
+      "purl_impact": "The epoch must be preserved as it is the most significant part of version comparison."
     },
     {
       "case": "Source packages",
-      "handling": "Use arch=source to identify source packages",
-      "purl_impact": "Distinguishes between source and binary packages"
+      "handling": "Use 'arch=source' to identify source packages.",
+      "purl_impact": "Distinguishes between source and binary packages."
     },
     {
       "case": "Binary revisions",
-      "handling": "Binary revisions are represented with +bN suffix in version",
-      "purl_impact": "The + character must be percent-encoded as %2B in URLs"
-    },
-    {
-      "case": "Multiple repositories for same vendor",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+      "handling": "Binary-specific revisions are suffixed with '+bN'.",
+      "purl_impact": "The '+' character must be percent-encoded as '%2B' in the PURL version component."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "All deb packages use the 'debian' vendor",
-      "Package names can contain uppercase letters",
-      "Versions follow standard SemVer",
-      "Architecture qualifier is optional",
-      "There is a default repository URL"
+      "All deb packages use the 'debian' vendor.",
+      "Package names can contain uppercase letters.",
+      "Versions follow standard SemVer."
     ],
     "key_facts_to_remember": [
-      "Vendor/namespace is required and must be lowercase",
-      "Package name is required and must be lowercase",
-      "Version is required and follows Debian versioning format",
-      "Versions may include epoch (number followed by colon)",
-      "Source packages use arch=source"
+      "Vendor/namespace is required and must be lowercase.",
+      "Package name is required, must be lowercase, and can contain hyphens.",
+      "Version is required and follows the complex Debian versioning format.",
+      "The 'arch' qualifier is optional but strongly recommended for identifying binary packages.",
+      "Source packages are identified by 'arch=source'."
     ],
     "common_mistakes_to_avoid": [
-      "Using uppercase letters in vendor or package name",
-      "Omitting the required version component",
-      "Forgetting to encode the + character in binary revisions",
-      "Confusing source and binary packages",
-      "Assuming a default repository URL"
+      "Using uppercase letters in vendor or package name.",
+      "Omitting the required version component.",
+      "Forgetting to percent-encode the '+' character in binary revisions.",
+      "Assuming a default repository URL exists."
     ]
   },
   "examples": [
     {
       "purl": "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie",
-      "description": "Debian curl package for i386 architecture in Jessie distribution"
-    },
-    {
-      "purl": "pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch",
-      "description": "Debian dpkg package for amd64 architecture in Stretch distribution"
+      "description": "Debian curl package for i386 architecture in Jessie distribution."
     },
     {
       "purl": "pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64",
-      "description": "Ubuntu dpkg package for amd64 architecture"
+      "description": "Ubuntu dpkg package for amd64 architecture."
     },
     {
       "purl": "pkg:deb/debian/attr@1:2.4.47-2?arch=source",
-      "description": "Debian attr source package with epoch"
+      "description": "Debian attr source package with epoch."
     },
     {
       "purl": "pkg:deb/debian/attr@1:2.4.47-2%2Bb1?arch=amd64",
-      "description": "Debian attr binary package with epoch and binary revision"
+      "description": "Debian attr binary package with epoch and binary revision."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:deb/Debian/curl@7.50.3-1?arch=i386&distro=jessie",
-      "description": "Vendor with uppercase letters - violates lowercase requirement",
-      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+      "description": "Vendor with uppercase letters, which violates the lowercase requirement.",
+      "violation": "namespace_definition requires lowercasing."
     },
     {
       "purl": "pkg:deb/debian/Curl@7.50.3-1?arch=i386&distro=jessie",
-      "description": "Package name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:deb/debian/curl@7.50.3-1",
-      "description": "Missing architecture qualifier - typically required for deb packages",
-      "violation": "qualifiers_definition.arch is typically required for deb packages"
+      "description": "Package name with uppercase letters, which violates the lowercase requirement.",
+      "violation": "name_definition requires lowercasing."
     },
     {
       "purl": "pkg:deb/debian/curl",
-      "description": "Missing version component - version is required for deb",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:deb/debian",
-      "description": "Missing package name component - package name is required for deb",
+      "description": "Missing name component, which is required.",
       "violation": "name_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:deb",
-      "description": "Missing vendor component - vendor is required for deb",
-      "violation": "namespace_definition.requirement=required"
     }
   ],
   "references": [
     {
       "title": "Debian Policy Manual",
       "url": "https://www.debian.org/doc/debian-policy/"
-    },
-    {
-      "title": "Debian Package Management",
-      "url": "https://wiki.debian.org/PackageManagement"
-    },
-    {
-      "title": "Ubuntu Packages",
-      "url": "https://packages.ubuntu.com/"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
