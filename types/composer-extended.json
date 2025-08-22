@@ -15,36 +15,28 @@
     "supported_repositories": [
       "https://packagist.org"
     ],
-    "note": "Composer packages are primarily hosted on Packagist"
+    "note": "Composer packages are primarily hosted on Packagist."
   },
   "namespace_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "vendor",
-    "note": "The namespace is the vendor. The namespace is not case sensitive and must be lowercased."
+    "note": "The namespace is the vendor. It is not case-sensitive and must be lowercased in a PURL."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is not case sensitive and must be lowercased. Private, local packages may have no name, but PURLs cannot be created for these."
+    "note": "The package name. It is not case-sensitive and must be lowercased in a PURL."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is the package version following semantic versioning."
+    "note": "The version is the package version and is a required component."
   },
-  "qualifiers_definition": [
-    {
-      "key": "repository_url",
-      "requirement": "optional",
-      "description": "Custom repository URL for private or third-party repositories",
-      "examples": ["https://packages.example.com"]
-    }
-  ],
   "validation_rules": {
     "namespace": {
       "lowercase_required": true,
@@ -58,21 +50,16 @@
       "examples_invalid": ["Laravel", "console app", "http/foundation"]
     },
     "version": {
-      "format": "semver",
-      "examples_valid": ["5.5.0", "1.0.0", "2.1.3"],
+      "format": "semver-like",
+      "examples_valid": ["5.5.0", "1.0.0", "2.1.3", "1.0.0-beta1"],
       "examples_invalid": ["latest", "v5.5.0", "5.5"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:composer/{vendor}/{name}@{version}",
-      "description": "Standard Composer package reference",
+      "description": "Standard Composer package reference.",
       "example": "pkg:composer/laravel/laravel@5.5.0"
-    },
-    {
-      "pattern": "pkg:composer/{vendor}/{name}@{version}?repository_url={url}",
-      "description": "Composer package from custom repository",
-      "example": "pkg:composer/mycompany/mypackage@1.0.0?repository_url=https://packages.mycompany.com"
     }
   ],
   "anti_patterns": [
@@ -99,11 +86,6 @@
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
         "no": "Invalid PURL - version is required for composer"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
       }
     ]
   },
@@ -111,94 +93,72 @@
     "ecosystem": "PHP",
     "package_manager": "Composer",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:composer/{vendor}/{name}@{version}?{qualifiers}",
+    "hierarchical_structure": "pkg:composer/{vendor}/{name}@{version}",
     "versioning_system": "Semantic Versioning (SemVer)",
-    "naming_convention": "Vendor/package name convention with lowercase requirements"
+    "naming_convention": "Vendor/package name convention with lowercase requirements."
   },
   "edge_cases": [
     {
-      "case": "Private packages without public name",
-      "handling": "These packages cannot be represented as PURLs",
-      "purl_impact": "Only packages with a valid name can have PURLs"
-    },
-    {
-      "case": "Packages from private repositories",
-      "handling": "Use repository_url qualifier to specify non-Packagist repository",
-      "purl_impact": "Allows referencing packages from private or third-party repositories"
+      "case": "Private packages without a public name",
+      "handling": "These packages cannot be represented as PURLs, as a name is a required component.",
+      "purl_impact": "Only packages with a valid name can have PURLs."
     },
     {
       "case": "Dev versions",
-      "handling": "Development versions follow SemVer with stability suffixes",
-      "purl_impact": "Version should include stability suffix when present (e.g., 1.0.0-dev)"
+      "handling": "Development versions often include stability suffixes (e.g., -dev, -alpha).",
+      "purl_impact": "The version string in the PURL must include the stability suffix when present (e.g., 1.0.0-dev)."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Composer packages don't require a vendor",
-      "Package names can contain uppercase letters",
-      "Version can be omitted",
-      "All packages are on Packagist",
-      "Package names can contain spaces"
+      "Composer packages don't require a vendor.",
+      "Package names can contain uppercase letters.",
+      "Version can be omitted.",
+      "Composer PURLs use qualifiers."
     ],
     "key_facts_to_remember": [
-      "Vendor/namespace is required and must be lowercase",
-      "Package name is required and must be lowercase",
-      "Version is required and follows SemVer",
-      "Private packages without a name cannot have PURLs",
-      "Custom repositories use repository_url qualifier"
+      "Vendor/namespace is required and must be lowercase.",
+      "Package name is required and must be lowercase.",
+      "Version is required.",
+      "There are no qualifiers defined for the Composer PURL type."
     ],
     "common_mistakes_to_avoid": [
-      "Using uppercase letters in vendor or package name",
-      "Omitting the required version component",
-      "Forgetting to include vendor namespace",
-      "Using non-SemVer version strings",
-      "Assuming all packages are publicly available on Packagist"
+      "Using uppercase letters in the vendor or package name.",
+      "Omitting the required version component.",
+      "Forgetting to include the vendor namespace.",
+      "Adding qualifiers, which are not supported."
     ]
   },
   "examples": [
     {
       "purl": "pkg:composer/laravel/laravel@5.5.0",
-      "description": "Laravel PHP framework"
+      "description": "Laravel PHP framework."
     },
     {
       "purl": "pkg:composer/symfony/console@5.4.0",
-      "description": "Symfony Console component"
-    },
-    {
-      "purl": "pkg:composer/zendframework/zend-diactoros@2.3.0",
-      "description": "Zend Diactoros PSR-7 implementation"
+      "description": "Symfony Console component."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:composer/Laravel/laravel@5.5.0",
-      "description": "Vendor with uppercase letters - violates lowercase requirement",
-      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+      "description": "Vendor with uppercase letters, which violates the lowercase requirement.",
+      "violation": "namespace_definition requires lowercasing."
     },
     {
       "purl": "pkg:composer/laravel/Laravel@5.5.0",
-      "description": "Package name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:composer/laravel/laravel@latest",
-      "description": "Non-SemVer version - versions must follow SemVer format",
-      "violation": "version_definition requires SemVer format"
+      "description": "Package name with uppercase letters, which violates the lowercase requirement.",
+      "violation": "name_definition requires lowercasing."
     },
     {
       "purl": "pkg:composer/laravel/laravel",
-      "description": "Missing version component - version is required for composer",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:composer/laravel",
-      "description": "Missing package name component - package name is required for composer",
-      "violation": "name_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:composer",
-      "description": "Missing vendor component - vendor is required for composer",
-      "violation": "namespace_definition.requirement=required"
+      "description": "Missing package name and version components.",
+      "violation": "name_definition.requirement=required and version_definition.requirement=required"
     }
   ],
   "references": [
@@ -212,6 +172,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
