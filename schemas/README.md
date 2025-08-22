@@ -1,5 +1,7 @@
 # Introduction
 
+Following are some enhancements made to the original purl-type schema definition to improve clarity, completeness, and machine-readability. 
+
 1. Added `uri_compliance` section for explicit encoding rules
 2. Added `validation_rules` section for programmatic compliance checking
 3. Added `common_patterns` and `anti_patterns` sections for positive and negative examples
