@@ -32,17 +32,18 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is the package name. It is not case sensitive and must be lowercased."
+    "note": "The name is the package name. It is not case sensitive and must be lowercased. Any characters that are reserved in the PURL specification, such as '@', must be percent-encoded."
   },
   "version_definition": {
     "requirement": "required",
     "case_sensitive": true,
-    "encoding": "verbatim",
+    "encoding": "case-sensitive",
     "native_name": "version",
-    "note": "The version is the version of the package as specified in vercmp(8) at https://man.archlinux.org/man/vercmp.8#DESCRIPTION as part of alpm.",
-    "normalization_rules": [
-      "normalize version as specified in vercmp(8) at https://man.archlinux.org/man/vercmp.8#DESCRIPTION as part of alpm."
-    ]
+    "note": "The version of the package. The format must be valid for comparison by the vercmp(8) utility (see https://man.archlinux.org/man/vercmp.8)."
+  },
+  "subpath_definition": {
+    "requirement": "prohibited",
+    "note": "The subpath component is not used for the 'alpm' purl type and must be empty."
   },
   "qualifiers_definition": [
     {
@@ -55,13 +56,13 @@
     {
       "key": "distro",
       "requirement": "optional",
-      "description": "The distribution name when using multiple distributions",
+      "description": "The distribution name when using multiple distributions.",
       "examples": ["arch", "manjaro", "endeavouros"]
     },
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Base URL for the package repository",
+      "description": "Base URL for the package repository.",
       "examples": ["https://archive.archlinux.org/"]
     }
   ],
@@ -74,14 +75,15 @@
     "name": {
       "lowercase_required": true,
       "no_spaces": true,
-      "examples_valid": ["pacman", "python-pip", "containers-common"],
-      "examples_invalid": ["Pacman", "python pip", "containers@common"]
+      "examples_valid": ["pacman", "python-pip", "ca-certificates-utils", "example%40package"],
+      "examples_invalid": ["Pacman", "python pip", "invalid!char", "containers@common"]
     },
     "version": {
       "format": "vercmp(8) compliant",
       "supports_epoch": true,
-      "examples_valid": ["6.0.1-1", "21.0-1", "1:0.47.4-4"],
-      "examples_invalid": ["6.0.1", "21.0", "0.47.4-4:"]
+      "note": "While vercmp(8) can compare versions without a release number (e.g., '6.0.1'), its inclusion (e.g., '6.0.1-1') is a strong convention and best practice in the Arch ecosystem.",
+      "examples_valid": ["6.0.1-1", "21.0-1", "1:0.47.4-4", "6.0.1"],
+      "examples_invalid": ["0.47.4-4:"]
     }
   },
   "common_patterns": [
@@ -104,7 +106,7 @@
   "anti_patterns": [
     "pkg:alpm/Arch/pacman@6.0.1-1?arch=x86_64",
     "pkg:alpm/arch/Pacman@6.0.1-1?arch=x86_64",
-    "pkg:alpm/arch/pacman@6.0.1?arch=x86_64",
+    "pkg:alpm/arch/pacman@6.0.1-1?Arch=x86_64",
     "pkg:alpm/arch/pacman?arch=x86_64",
     "pkg:alpm/arch?arch=x86_64",
     "pkg:alpm/pacman@6.0.1-1?arch=x86_64"
@@ -162,6 +164,11 @@
       "case": "Multiple repositories for same vendor",
       "handling": "Use repository_url qualifier to specify non-default repository",
       "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+    },
+    {
+      "case": "Package names containing reserved characters",
+      "handling": "Characters reserved by the PURL specification, like '@', must be percent-encoded (e.g., as '%40') when they appear in the name component.",
+      "purl_impact": "Proper encoding is required to distinguish between the package name and the version separator."
     }
   ],
   "llm_guidance": {
@@ -169,21 +176,20 @@
       "All alpm packages use the 'arch' vendor",
       "Package names can contain uppercase letters",
       "Versions follow standard SemVer",
-      "Architecture qualifier is optional",
       "There is a default repository URL"
     ],
     "key_facts_to_remember": [
       "Vendor/namespace is required and must be lowercase",
-      "Package name is required and must be lowercase",
-      "Version is required and follows vercmp(8) specification",
-      "Versions may include epoch (number followed by colon)",
-      "Architecture qualifier should be included when known"
+      "Package name is required and must be lowercase. The '@' character must be percent-encoded.",
+      "Version is required and must be a valid input for the vercmp(8) utility",
+      "Versions may include an epoch (number followed by a colon)",
+      "The architecture qualifier is not required but should be included when known"
     ],
     "common_mistakes_to_avoid": [
       "Using uppercase letters in vendor or package name",
+      "Failing to percent-encode the '@' symbol in a package name",
       "Omitting the required version component",
       "Forgetting to include architecture when it's relevant",
-      "Misinterpreting epoch in version as part of the package name",
       "Assuming a default repository URL"
     ]
   },
@@ -203,6 +209,14 @@
     {
       "purl": "pkg:alpm/manjaro/systemd@251.7-1?arch=x86_64",
       "description": "Package from Manjaro vendor"
+    },
+    {
+      "purl": "pkg:alpm/arch/ca-certificates-utils@20210603-1?arch=any",
+      "description": "Package with hyphens in the name, which is valid."
+    },
+    {
+      "purl": "pkg:alpm/arch/example%40package@1.2-3?arch=x86_64",
+      "description": "Package with a native name containing '@', which must be percent-encoded ('%40') in the PURL."
     }
   ],
   "incorrect_examples": [
@@ -217,9 +231,14 @@
       "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
     },
     {
-      "purl": "pkg:alpm/arch/pacman@6.0.1?arch=x86_64",
-      "description": "Missing release number in version - violates vercmp(8) format",
-      "violation": "version_definition requires vercmp(8) compliant version with release number"
+      "purl": "pkg:alpm/arch/example@package@1.2-3?arch=x86_64",
+      "description": "Unencoded '@' character in the package name, which conflicts with the version separator.",
+      "violation": "Reserved characters like '@' in the name component must be percent-encoded."
+    },
+    {
+      "purl": "pkg:alpm/arch/python-pip@21.0-1?arch=x86_64&subpath=lib",
+      "description": "Subpath is present - subpath is prohibited for the alpm type.",
+      "violation": "subpath_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:alpm/arch/pacman?arch=x86_64",
@@ -252,6 +271,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-22"
   }
 }
