@@ -18,14 +18,14 @@
       "https://backpan.perl.org/",
       "https://cpan.metacpan.org/"
     ],
-    "note": "CPAN packages are hosted on various CPAN repositories"
+    "note": "CPAN packages are hosted on various CPAN repositories."
   },
   "namespace_definition": {
     "requirement": "optional",
     "case_sensitive": true,
     "encoding": "uppercase",
     "native_name": "author id",
-    "note": "To refer to a CPAN distribution name, the namespace MUST be present. In this case, the namespace is the CPAN id of the author/publisher. It MUST be written uppercase, followed by the distribution name in the name component. A distribution name MUST NOT contain the string ::."
+    "note": "- To refer to a CPAN distribution name, the namespace MUST be present. In this case, the namespace is the CPAN id of the author/publisher. It MUST be written uppercase, followed by the distribution name in the name component. A distribution name MUST NOT contain the string ::.\n- To refer to a CPAN module, the namespace MUST be absent. The module name MAY contain zero or more :: strings, and the module name MUST NOT contain a -"
   },
   "name_definition": {
     "requirement": "required",
@@ -89,30 +89,24 @@
     "version": {
       "format": "perl-version",
       "examples_valid": ["1.013", "1.55", "6.76"],
-      "examples_invalid": ["v1.013", "latest", ""]
+      "examples_invalid": ["v1.013", "latest"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:cpan/{module}[@{version}]",
-      "description": "CPAN module reference (no namespace)",
+      "description": "CPAN module reference (namespace is absent).",
       "example": "pkg:cpan/Perl::Version@1.013"
     },
     {
       "pattern": "pkg:cpan/{author}/{distribution}[@{version}]",
-      "description": "CPAN distribution reference (with namespace)",
+      "description": "CPAN distribution reference (namespace is present).",
       "example": "pkg:cpan/DROLSKY/DateTime@1.55"
-    },
-    {
-      "pattern": "pkg:cpan/{module}",
-      "description": "CPAN module reference without version",
-      "example": "pkg:cpan/LWP::UserAgent"
     }
   ],
   "anti_patterns": [
     "pkg:cpan/drolsky/DateTime@1.55",
     "pkg:cpan/DROLSKY/Perl::Version@1.013",
-    "pkg:cpan/DROLSKY/DateTime::TimeZone@1.55",
     "pkg:cpan/Perl-Version@1.013",
     "pkg:cpan/"
   ],
@@ -120,23 +114,18 @@
     "steps": [
       {
         "question": "Is there a namespace component?",
-        "yes": "Extract the author/namespace (first component after pkg:cpan/)",
-        "no": "Proceed with module name parsing"
+        "yes": "This is a distribution PURL. Extract the author/namespace.",
+        "no": "This is a module PURL. Proceed with name parsing."
       },
       {
-        "question": "Is there a name component?",
-        "yes": "Extract the name (component after namespace/ or after pkg:cpan/ if no namespace)",
-        "no": "Invalid PURL - name is required for cpan"
+        "question": "Does the name component adhere to the rules for its type (distribution vs. module)?",
+        "yes": "Extract the name.",
+        "no": "Invalid PURL - name format violates rules for its type."
       },
       {
         "question": "Is there a version component?",
-        "yes": "Extract everything after @ as version",
-        "no": "Version is optional for cpan"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "yes": "Extract everything after @ as version.",
+        "no": "No version specified; this is permitted."
       }
     ]
   },
@@ -146,121 +135,92 @@
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:cpan/[{namespace}/]{name}[@{version}][?{qualifiers}]",
     "versioning_system": "Perl versioning",
-    "dual_naming": "Supports both modules (with ::) and distributions (with -)",
-    "namespace_usage": "Namespace indicates author for distributions, omitted for modules"
+    "dual_naming": "Supports both modules (namespace absent, name may contain ::) and distributions (namespace present, name may contain -)."
   },
   "edge_cases": [
     {
-      "case": "Modules without version",
-      "handling": "Version is optional and can be omitted",
-      "purl_impact": "Allows referencing the latest version of a module"
+      "case": "PURLs without a version",
+      "handling": "Version is optional and can be omitted for both modules and distributions.",
+      "purl_impact": "Allows referencing the latest version of a package."
     },
     {
-      "case": "Different naming conventions",
-      "handling": "Modules use :: while distributions use -",
-      "purl_impact": "The presence/absence of namespace determines the naming convention"
-    },
-    {
-      "case": "Multiple repositories",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Allows referencing packages from MetaCPAN, BackPAN, or DarkPAN"
+      "case": "Distinction between module and distribution",
+      "handling": "The presence of a namespace component is the sole determinant: if present, it is a distribution; if absent, it is a module.",
+      "purl_impact": "This structural rule determines which validation rules apply to the name component."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "All CPAN packages have a namespace",
-      "Module names can contain dashes",
-      "Distribution names can contain double colons",
-      "Author IDs are case-insensitive",
-      "Version is always required"
+      "All CPAN packages have a namespace.",
+      "Module names can contain dashes (-).",
+      "Distribution names can contain double colons (::).",
+      "Author IDs (namespaces) are case-insensitive."
     ],
     "key_facts_to_remember": [
-      "Namespace is optional and represents author ID for distributions",
-      "Module names (no namespace) may contain :: but not -",
-      "Distribution names (with namespace) may contain - but not ::",
-      "Author IDs must be uppercase when present",
-      "Version is optional"
+      "Namespace is optional. Its presence indicates a distribution, and its absence indicates a module.",
+      "Module names (no namespace) may contain :: but not -.",
+      "Distribution names (with namespace) may contain - but not ::.",
+      "Author IDs (namespaces) must be uppercase.",
+      "Version is optional."
     ],
     "common_mistakes_to_avoid": [
-      "Using lowercase for author IDs",
-      "Using :: in distribution names",
-      "Using - in module names",
-      "Forgetting that version is optional",
-      "Confusing modules with distributions"
+      "Using lowercase for author IDs.",
+      "Using :: in distribution names (when a namespace is present).",
+      "Using - in module names (when a namespace is absent).",
+      "Confusing modules with distributions."
     ]
   },
   "examples": [
     {
       "purl": "pkg:cpan/Perl::Version@1.013",
-      "description": "Perl module with version"
+      "description": "Perl module with version."
     },
     {
       "purl": "pkg:cpan/DROLSKY/DateTime@1.55",
-      "description": "CPAN distribution with author and version"
+      "description": "CPAN distribution with author and version."
     },
     {
       "purl": "pkg:cpan/DateTime@1.55",
-      "description": "Module without namespace (could be module or distribution)"
+      "description": "Module reference with version (module name is 'DateTime')."
     },
     {
       "purl": "pkg:cpan/GDT/URI-PackageURL",
-      "description": "Distribution without version"
+      "description": "Distribution without version."
     },
     {
       "purl": "pkg:cpan/LWP::UserAgent",
-      "description": "Module without namespace or version"
-    },
-    {
-      "purl": "pkg:cpan/OALDERS/libwww-perl@6.76",
-      "description": "Distribution with dash in name"
-    },
-    {
-      "purl": "pkg:cpan/URI",
-      "description": "Simple module name without version"
+      "description": "Module without version."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:cpan/drolsky/DateTime@1.55",
-      "description": "Author ID with lowercase letters - author IDs must be uppercase",
-      "violation": "namespace_definition.case_sensitive=true and namespace_definition.encoding=uppercase"
+      "description": "Author ID (namespace) contains lowercase letters, but must be uppercase.",
+      "violation": "namespace_definition requires namespace to be uppercase."
     },
     {
       "purl": "pkg:cpan/DROLSKY/Perl::Version@1.013",
-      "description": "Distribution name with :: - distribution names must not contain ::",
-      "violation": "name_definition note prohibits :: in distribution names"
-    },
-    {
-      "purl": "pkg:cpan/DROLSKY/DateTime::TimeZone@1.55",
-      "description": "Distribution name with :: - distribution names must not contain ::",
-      "violation": "name_definition note prohibits :: in distribution names"
+      "description": "A PURL with a namespace is a distribution, but its name contains '::', which is prohibited for distributions.",
+      "violation": "name_definition note prohibits '::' in distribution names."
     },
     {
       "purl": "pkg:cpan/Perl-Version@1.013",
-      "description": "Module name with - - module names must not contain -",
-      "violation": "name_definition note prohibits - in module names"
+      "description": "A PURL without a namespace is a module, but its name contains '-', which is prohibited for modules.",
+      "violation": "name_definition note prohibits '-' in module names."
     },
     {
       "purl": "pkg:cpan/",
-      "description": "Missing name component - name is required for cpan",
+      "description": "Missing name component, which is required.",
       "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "CPAN Documentation",
-      "url": "https://www.cpan.org/modules/01modules.index.html"
-    },
-    {
-      "title": "MetaCPAN Documentation",
-      "url": "https://metacpan.org/"
-    },
-    {
-      "title": "CPAN FAQ",
-      "url": "https://www.cpan.org/misc/cpan-faq.html"
+      "title": "CPAN",
+      "url": "https://www.cpan.org/"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
