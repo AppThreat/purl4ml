@@ -16,11 +16,11 @@
       "https://conda.anaconda.org",
       "https://anaconda.org"
     ],
-    "note": "Conda packages are hosted on Anaconda repositories"
+    "note": "Conda packages are hosted on Anaconda repositories."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for Conda packages."
   },
   "name_definition": {
     "requirement": "required",
@@ -63,23 +63,23 @@
   "validation_rules": {
     "name": {
       "examples_valid": ["absl-py", "numpy", "python", "scipy"],
-      "examples_invalid": ["", "absl py", "absl@py"]
+      "examples_invalid": ["absl py", "absl@py"]
     },
     "version": {
       "format": "conda-version",
       "examples_valid": ["0.4.1", "1.20.3", "3.9.7"],
-      "examples_invalid": ["", "latest", "v0.4.1"]
+      "examples_invalid": ["latest", "v0.4.1"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:conda/{name}@{version}?build={build}&channel={channel}&subdir={subdir}&type={type}",
-      "description": "Standard Conda package with all qualifiers",
+      "description": "Standard Conda package with all qualifiers.",
       "example": "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2"
     },
     {
       "pattern": "pkg:conda/{name}@{version}?subdir={subdir}",
-      "description": "Conda package with platform only",
+      "description": "Conda package with version and platform only.",
       "example": "pkg:conda/python@3.9.7?subdir=linux-64"
     }
   ],
@@ -120,87 +120,78 @@
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:conda/{name}@{version}?{qualifiers}",
     "versioning_system": "Conda-specific versioning",
-    "platform_support": "Multiple platforms via subdir qualifier",
-    "repository_model": "Centralized with Anaconda repositories"
+    "platform_support": "Multiple platforms via subdir qualifier.",
+    "repository_model": "Centralized with Anaconda repositories."
   },
   "edge_cases": [
     {
-      "case": "Packages without build string",
-      "handling": "Build qualifier is optional and can be omitted",
-      "purl_impact": "Simplifies PURLs when build information is not needed"
+      "case": "Packages without a build string",
+      "handling": "The 'build' qualifier is optional and can be omitted.",
+      "purl_impact": "Simplifies PURLs when build information is not needed or available."
     },
     {
       "case": "Noarch packages",
-      "handling": "Use subdir=noarch for architecture-independent packages",
-      "purl_impact": "Indicates the package works on any platform"
-    },
-    {
-      "case": "Multiple channels",
-      "handling": "Channel qualifier specifies which repository channel to use",
-      "purl_impact": "Allows disambiguation when same package exists in multiple channels"
+      "handling": "Use subdir=noarch for architecture-independent packages.",
+      "purl_impact": "Indicates the package works on any platform."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Conda packages have namespaces",
-      "Package names can contain spaces or special characters",
-      "Version is optional",
-      "All qualifiers are required",
-      "All packages use the same platform"
+      "Conda packages have namespaces.",
+      "Version is optional.",
+      "All qualifiers are required."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for conda packages",
-      "Package name is required",
-      "Version is required",
-      "Build, channel, subdir, and type are optional qualifiers",
-      "Platform is specified via subdir qualifier"
+      "Namespace is prohibited.",
+      "Package name is required.",
+      "Version is required.",
+      "Build, channel, subdir, and type are all optional qualifiers.",
+      "Platform is specified via the 'subdir' qualifier."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Omitting the required version component",
-      "Using invalid characters in package names",
-      "Confusing conda with other package managers",
-      "Forgetting to specify platform when relevant"
+      "Adding a namespace component.",
+      "Omitting the required version component.",
+      "Confusing conda with other package managers."
     ]
   },
   "examples": [
     {
       "purl": "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
-      "description": "Abseil Python package with full qualifiers"
+      "description": "Abseil Python package with full qualifiers."
     },
     {
       "purl": "pkg:conda/numpy@1.20.3?subdir=linux-64",
-      "description": "NumPy package with platform only"
+      "description": "NumPy package with version and platform."
     },
     {
       "purl": "pkg:conda/python@3.9.7?build=h70747c6_1&channel=defaults&subdir=osx-64",
-      "description": "Python package for macOS"
+      "description": "Python package for macOS."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:conda/namespace/absl-py@0.4.1",
-      "description": "Includes namespace component - namespace is prohibited for conda",
+      "description": "Includes a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:conda/absl-py",
-      "description": "Missing version component - version is required for conda",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:conda/absl-py@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
+      "description": "Empty version component. If the '@' is present, a version must follow.",
+      "violation": "Version must not be empty."
     },
     {
       "purl": "pkg:conda/absl-py@0.4.1?build=",
-      "description": "Empty build qualifier - if provided, build must have a value",
-      "violation": "qualifiers_definition.build requires a value when present"
+      "description": "Empty build qualifier value. If a qualifier key is present, its value must not be empty.",
+      "violation": "Qualifiers must have a value when present."
     },
     {
       "purl": "pkg:conda/",
-      "description": "Missing package name component - name is required for conda",
+      "description": "Missing package name component, which is required.",
       "violation": "name_definition.requirement=required"
     }
   ],
@@ -219,6 +210,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
