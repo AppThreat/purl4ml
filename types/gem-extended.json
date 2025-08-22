@@ -1,0 +1,203 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/gem-extended-definition.json",
+  "type": "gem",
+  "type_name": "RubyGems",
+  "description": "RubyGems",
+  "uri_compliance": {
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://rubygems.org",
+    "supported_repositories": [
+      "https://rubygems.org"
+    ],
+    "note": "RubyGems are hosted on the official RubyGems repository"
+  },
+  "namespace_definition": {
+    "requirement": "prohibited",
+    "note": "There is no namespace"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "encoding": "lowercase",
+    "native_name": "name",
+    "note": "The name is the gem name and must be lowercase."
+  },
+  "version_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the gem version following RubyGems versioning scheme."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "platform",
+      "native_name": "platform",
+      "requirement": "optional",
+      "default_value": "ruby",
+      "description": "qualifiers key is used to specify an alternative platform. such as java for JRuby. The implied default is ruby for Ruby MRI.",
+      "examples": ["ruby", "java", "mswin32", "mingw32"]
+    }
+  ],
+  "validation_rules": {
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["ruby-advisory-db-check", "jruby-launcher", "rails"],
+      "examples_invalid": ["Ruby-Advisory-DB-Check", "ruby advisory db check", "ruby@advisory"]
+    },
+    "version": {
+      "format": "rubygem-version",
+      "examples_valid": ["0.12.4", "1.1.2", "6.1.4"],
+      "examples_invalid": ["", "latest", "v0.12.4"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:gem/{name}@{version}",
+      "description": "Standard RubyGem with default ruby platform",
+      "example": "pkg:gem/ruby-advisory-db-check@0.12.4"
+    },
+    {
+      "pattern": "pkg:gem/{name}@{version}?platform={platform}",
+      "description": "RubyGem with specific platform",
+      "example": "pkg:gem/jruby-launcher@1.1.2?platform=java"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:gem/namespace/ruby-advisory-db-check@0.12.4",
+    "pkg:gem/Ruby-Advisory-DB-Check@0.12.4",
+    "pkg:gem/ruby-advisory-db-check",
+    "pkg:gem/ruby-advisory-db-check@",
+    "pkg:gem/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Invalid PURL - namespace is prohibited for gem",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a gem name component?",
+        "yes": "Extract the name (component after pkg:gem/)",
+        "no": "Invalid PURL - name is required for gem"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Invalid PURL - version is required for gem"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present (platform defaults to ruby)"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Ruby",
+    "package_manager": "RubyGems",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:gem/{name}@{version}[?{qualifiers}]",
+    "versioning_system": "RubyGems versioning",
+    "platform_support": "Multiple Ruby implementations (MRI, JRuby, etc.)",
+    "repository_model": "Centralized with RubyGems.org as default"
+  },
+  "edge_cases": [
+    {
+      "case": "Gems for alternative Ruby implementations",
+      "handling": "Use platform qualifier to specify non-MRI implementations",
+      "purl_impact": "Allows disambiguation between gems for different Ruby platforms"
+    },
+    {
+      "case": "Platform-specific gems",
+      "handling": "Platform qualifier indicates the target platform",
+      "purl_impact": "Enables precise reference to platform-specific variants"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "RubyGems have namespaces",
+      "Gem names can contain uppercase letters",
+      "Version is optional",
+      "All gems work on all Ruby platforms",
+      "Platform qualifier is required"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is prohibited for gem packages",
+      "Gem name is required and must be lowercase",
+      "Version is required and follows RubyGems versioning",
+      "Platform qualifier defaults to 'ruby' for MRI",
+      "Platform qualifier is used for alternative Ruby implementations"
+    ],
+    "common_mistakes_to_avoid": [
+      "Adding a namespace component",
+      "Using uppercase letters in gem names",
+      "Omitting the required version component",
+      "Forgetting that platform defaults to ruby",
+      "Using invalid platform values"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:gem/ruby-advisory-db-check@0.12.4",
+      "description": "Ruby advisory database checker gem"
+    },
+    {
+      "purl": "pkg:gem/jruby-launcher@1.1.2?platform=java",
+      "description": "JRuby launcher gem for Java platform"
+    },
+    {
+      "purl": "pkg:gem/rails@6.1.4",
+      "description": "Rails web framework gem with default ruby platform"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:gem/namespace/ruby-advisory-db-check@0.12.4",
+      "description": "Includes namespace component - namespace is prohibited for gem",
+      "violation": "namespace_definition.requirement=prohibited"
+    },
+    {
+      "purl": "pkg:gem/Ruby-Advisory-DB-Check@0.12.4",
+      "description": "Gem name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:gem/ruby-advisory-db-check",
+      "description": "Missing version component - version is required for gem",
+      "violation": "version_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:gem/ruby-advisory-db-check@",
+      "description": "Empty version component - version cannot be empty",
+      "violation": "version_definition requires a valid version"
+    },
+    {
+      "purl": "pkg:gem/",
+      "description": "Missing gem name component - name is required for gem",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "RubyGems Documentation",
+      "url": "https://guides.rubygems.org/"
+    },
+    {
+      "title": "RubyGems.org",
+      "url": "https://rubygems.org/"
+    },
+    {
+      "title": "RubyGems Specification",
+      "url": "https://github.com/rubygems/rubygems/blob/master/lib/rubygems/specification.rb"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

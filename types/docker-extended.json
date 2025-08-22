@@ -1,0 +1,236 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/docker-extended-definition.json",
+  "type": "docker",
+  "type_name": "Docker image",
+  "description": "for Docker images",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "default_repository_url": "https://hub.docker.com",
+    "supported_repositories": [
+      "https://hub.docker.com",
+      "https://gcr.io",
+      "https://quay.io",
+      "https://registry.gitlab.com"
+    ],
+    "note": "Docker images can be hosted on various container registries"
+  },
+  "namespace_definition": {
+    "requirement": "optional",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "registry/user/organization",
+    "note": "The namespace is the registry/user/organization if present."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "image name",
+    "note": "The name is the Docker image name."
+  },
+  "version_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "tag or image id",
+    "note": "The version should be the image id sha256 or a tag. Since tags can be moved, a sha256 image id is preferred."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Custom container registry URL",
+      "examples": ["gcr.io", "quay.io", "registry.gitlab.com"]
+    },
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "description": "Architecture for multi-architecture images",
+      "examples": ["amd64", "arm64", "s390x"]
+    },
+    {
+      "key": "os",
+      "requirement": "optional",
+      "description": "Operating system for multi-OS images",
+      "examples": ["linux", "windows"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["smartentry", "customer", "library"],
+      "examples_invalid": ["SmartEntry", "customer/", "customer@name"]
+    },
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["cassandra", "debian", "dockerimage"],
+      "examples_invalid": ["Cassandra", "image name", "image@name"]
+    },
+    "version": {
+      "format": "tag-or-sha256",
+      "examples_valid": ["latest", "dc437cc87d10", "sha256:244fd47e07d10"],
+      "examples_invalid": ["", "latest@tag", "sha256@244fd47e07d10"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:docker/{name}@{tag}",
+      "description": "Docker image with tag",
+      "example": "pkg:docker/cassandra@latest"
+    },
+    {
+      "pattern": "pkg:docker/{namespace}/{name}@{tag}",
+      "description": "Docker image with namespace and tag",
+      "example": "pkg:docker/smartentry/debian@dc437cc87d10"
+    },
+    {
+      "pattern": "pkg:docker/{namespace}/{name}@sha256:{digest}?repository_url={registry}",
+      "description": "Docker image with SHA256 digest and custom registry",
+      "example": "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:docker/Cassandra@latest",
+    "pkg:docker/smartentry/Debian@dc437cc87d10",
+    "pkg:docker/customer/dockerimage@sha256:244fd47e07d10",
+    "pkg:docker/",
+    "pkg:docker"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:docker/)",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there an image name component?",
+        "yes": "Extract the image name (component after namespace/ or after pkg:docker/ if no namespace)",
+        "no": "Invalid PURL - image name is required for docker"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Version is optional for docker"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Docker",
+    "package_manager": "Docker",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:docker/[{namespace}/]{name}[@{version}][?{qualifiers}]",
+    "versioning_system": "Tags and SHA256 digests",
+    "multi_architecture_support": "Supports multiple architectures and operating systems",
+    "registry_model": "Distributed with Docker Hub as default"
+  },
+  "edge_cases": [
+    {
+      "case": "Images from private registries",
+      "handling": "Use repository_url qualifier to specify non-default registry",
+      "purl_impact": "Allows referencing images from any container registry"
+    },
+    {
+      "case": "Multi-architecture images",
+      "handling": "Use arch and os qualifiers to specify platform",
+      "purl_impact": "Enables precise reference to specific platform variants"
+    },
+    {
+      "case": "SHA256 digest with colon",
+      "handling": "Colon in SHA256 must be percent-encoded in URLs",
+      "purl_impact": "Ensures proper URL formatting for digests"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "All Docker images have a namespace",
+      "Image names are case-sensitive",
+      "Version is always required",
+      "All images are on Docker Hub",
+      "Tags are immutable"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is optional and represents registry/user/organization",
+      "Image name is required and must be lowercase",
+      "Version is optional and can be a tag or SHA256 digest",
+      "SHA256 digests are preferred over tags for immutability",
+      "Custom registries use repository_url qualifier"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in namespace or image name",
+      "Forgetting to percent-encode colons in SHA256 digests",
+      "Assuming tags are immutable (they can be moved)",
+      "Omitting the image name component",
+      "Confusing namespace with repository_url"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:docker/cassandra@latest",
+      "description": "Official Cassandra image with latest tag"
+    },
+    {
+      "purl": "pkg:docker/smartentry/debian@dc437cc87d10",
+      "description": "SmartEntry Debian image with tag"
+    },
+    {
+      "purl": "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
+      "description": "Custom image from Google Container Registry with SHA256 digest"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:docker/Cassandra@latest",
+      "description": "Image name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:docker/smartentry/Debian@dc437cc87d10",
+      "description": "Image name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:docker/customer/dockerimage@sha256:244fd47e07d10",
+      "description": "Unencoded colon in SHA256 digest - must be percent-encoded",
+      "violation": "Colon in SHA256 must be percent-encoded as %3A"
+    },
+    {
+      "purl": "pkg:docker/",
+      "description": "Missing image name component - image name is required for docker",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:docker",
+      "description": "Missing image name component - image name is required for docker",
+      "violation": "name_definition.requirement=required"
+    }
+  ],
+  "references": [
+    {
+      "title": "Docker Documentation",
+      "url": "https://docs.docker.com/"
+    },
+    {
+      "title": "Docker Hub",
+      "url": "https://hub.docker.com/"
+    },
+    {
+      "title": "Container Registry Documentation",
+      "url": "https://docs.docker.com/registry/"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

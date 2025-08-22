@@ -1,0 +1,243 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/golang-extended-definition.json",
+  "type": "golang",
+  "type_name": "Go package",
+  "description": "Go packages",
+  "uri_compliance": {
+    "namespace_encoding": "lowercase",
+    "name_encoding": "lowercase",
+    "version_encoding": "verbatim",
+    "subpath_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": true,
+    "note": "There is no default package repository, this is implied in the namespace using the go get command conventions. In practice the go module proxy acts as a public default repository.",
+    "supported_repositories": [
+      "https://proxy.golang.org"
+    ]
+  },
+  "namespace_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "module path",
+    "note": "The namespace must be lowercased and represents the module path."
+  },
+  "name_definition": {
+    "requirement": "required",
+    "case_sensitive": false,
+    "encoding": "lowercase",
+    "native_name": "package name",
+    "note": "The name must be lowercased and represents the package name within the module."
+  },
+  "version_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "version or commit",
+    "note": "The version is often empty when a commit is not specified and should be the commit in most cases when available."
+  },
+  "subpath_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "subpath",
+    "note": "The subpath is used to point to a subpath inside a package."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "Custom Go module proxy URL",
+      "examples": ["https://proxy.golang.org", "https://gocenter.io", "https://athens.azurefd.net"]
+    }
+  ],
+  "validation_rules": {
+    "namespace": {
+      "lowercase_required": true,
+      "examples_valid": ["github.com/gorilla", "google.golang.org", "golang.org/x"],
+      "examples_invalid": ["github.com/Gorilla", "Google.golang.org", "golang.org/X"]
+    },
+    "name": {
+      "lowercase_required": true,
+      "no_spaces": true,
+      "examples_valid": ["context", "genproto", "net"],
+      "examples_invalid": ["Context", "gen proto", "net@sub"]
+    },
+    "version": {
+      "format": "golang-version",
+      "examples_valid": ["234fd47e07d1004f0aed9c", "v1.2.3", "0.0.0-20210101010101-abcdef123456"],
+      "examples_invalid": ["", "latest"]
+    },
+    "subpath": {
+      "format": "subpath",
+      "examples_valid": ["api", "googleapis/api/annotations", "internal/subpackage"],
+      "examples_invalid": ["", "/api", "api/"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:golang/{namespace}/{name}[@{version}]",
+      "description": "Go package with optional version",
+      "example": "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c"
+    },
+    {
+      "pattern": "pkg:golang/{namespace}/{name}#{subpath}",
+      "description": "Go package with subpath",
+      "example": "pkg:golang/google.golang.org/genproto#googleapis/api/annotations"
+    },
+    {
+      "pattern": "pkg:golang/{namespace}/{name}@{version}#{subpath}",
+      "description": "Go package with version and subpath",
+      "example": "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:golang/github.com/Gorilla/context@234fd47e07d1004f0aed9c",
+    "pkg:golang/github.com/gorilla/Context@234fd47e07d1004f0aed9c",
+    "pkg:golang/github.com/gorilla/context@latest",
+    "pkg:golang/github.com/gorilla/context#",
+    "pkg:golang/"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:golang/)",
+        "no": "Invalid PURL - namespace is required for golang"
+      },
+      {
+        "question": "Is there a package name component?",
+        "yes": "Extract the package name (component after namespace/)",
+        "no": "Invalid PURL - package name is required for golang"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Version is optional for golang"
+      },
+      {
+        "question": "Is there a subpath component?",
+        "yes": "Extract everything after # as subpath",
+        "no": "No subpath present"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Go",
+    "package_manager": "Go modules",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:golang/{namespace}/{name}[@{version}][#{subpath}][?{qualifiers}]",
+    "versioning_system": "Go modules versioning with semantic versions and pseudo-versions",
+    "module_path_convention": "Namespace represents the module path",
+    "proxy_support": "Go module proxy as default repository"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages without version",
+      "handling": "Version is optional and can be omitted",
+      "purl_impact": "Allows referencing the latest version of a package"
+    },
+    {
+      "case": "Pseudo-versions",
+      "handling": "Versions can be pseudo-versions based on commit timestamps and hashes",
+      "purl_impact": "Enables precise reference to specific commits"
+    },
+    {
+      "case": "Subpackages within modules",
+      "handling": "Use subpath to reference specific subpackages",
+      "purl_impact": "Allows fine-grained reference to parts of a module"
+    },
+    {
+      "case": "Private module proxies",
+      "handling": "Use repository_url qualifier to specify non-default proxy",
+      "purl_impact": "Enables referencing packages from private or alternative proxies"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "Go packages have simple names without namespaces",
+      "Package names can contain uppercase letters",
+      "Version is always required",
+      "All packages use the same repository",
+      "Subpath is always required"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is required and represents the module path",
+      "Package name is required and represents the package within the module",
+      "Version is optional and can be a semantic version, pseudo-version, or commit hash",
+      "Subpath is optional and points to a subpath inside the package",
+      "The Go module proxy acts as the default repository"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using uppercase letters in namespace or package name",
+      "Forgetting that version is optional",
+      "Using 'latest' as version (not a specific version)",
+      "Confusing modules with packages",
+      "Omitting required namespace or package name components"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c",
+      "description": "Gorilla context package with commit hash"
+    },
+    {
+      "purl": "pkg:golang/google.golang.org/genproto#googleapis/api/annotations",
+      "description": "Google protocol buffer generators with subpath"
+    },
+    {
+      "purl": "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api",
+      "description": "Gorilla context package with commit hash and subpath"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:golang/github.com/Gorilla/context@234fd47e07d1004f0aed9c",
+      "description": "Namespace with uppercase letters - violates lowercase requirement",
+      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:golang/github.com/gorilla/Context@234fd47e07d1004f0aed9c",
+      "description": "Package name with uppercase letters - violates lowercase requirement",
+      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+    },
+    {
+      "purl": "pkg:golang/github.com/gorilla/context@latest",
+      "description": "Non-specific version - 'latest' is not a valid Go version",
+      "violation": "version_definition requires a valid version or commit hash"
+    },
+    {
+      "purl": "pkg:golang/github.com/gorilla/context#",
+      "description": "Empty subpath - if provided, subpath should have a value",
+      "violation": "subpath_definition requires a valid subpath when present"
+    },
+    {
+      "purl": "pkg:golang/",
+      "description": "Missing namespace and package name components - both are required for golang",
+      "violation": "namespace_definition.requirement=required and name_definition.requirement=required"
+    }
+  ],
+  "note": "The current definition predates Go modules and has several practical problems, and in particular it is impossible to determine what is a module and what is a package short of having full access to the source code or making an API call to the Go module proxy.",
+  "references": [
+    {
+      "title": "Go Modules Reference",
+      "url": "https://golang.org/ref/mod"
+    },
+    {
+      "title": "Go Module Proxy",
+      "url": "https://proxy.golang.org/"
+    },
+    {
+      "title": "Go Package Management",
+      "url": "https://golang.org/doc/modules/managing-dependencies"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AppThreat/purl4ml/refs/heads/main/schemas/purl-type-extended-definition.schema.json",
+  "$id": "https://packageurl.org/types/generic-extended-definition.json",
+  "type": "generic",
+  "type_name": "Generic Package",
+  "description": "The generic type is for plain, generic packages that do not fit anywhere else such as for \"upstream-from-distro\" packages. In particular this is handy for a plain version control repository such as a bare git repo in combination with a vcs_url.",
+  "uri_compliance": {
+    "namespace_encoding": "verbatim",
+    "name_encoding": "verbatim",
+    "version_encoding": "verbatim"
+  },
+  "repository": {
+    "use_repository": false,
+    "note": "There is no default repository."
+  },
+  "namespace_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "note": "there is no generic namespace definition"
+  },
+  "name_definition": {
+    "requirement": "required",
+    "encoding": "verbatim",
+    "native_name": "name",
+    "note": "as for other type, the name component is mandatory. In the worst case it can be a file or directory name."
+  },
+  "version_definition": {
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "version",
+    "note": "The version is the package version when available."
+  },
+  "qualifiers_definition": [
+    {
+      "key": "download_url",
+      "requirement": "optional",
+      "description": "A download_url and checksum may be provided in qualifiers or as separate attributes outside of a purl for proper identification and location.",
+      "examples": ["https://openssl.org/source/openssl-1.1.0g.tar.gz"]
+    },
+    {
+      "key": "checksum",
+      "requirement": "optional",
+      "description": "A checksum may be provided in qualifiers or as separate attributes outside of a purl for proper identification and location.",
+      "examples": ["sha256:de4d501267da", "sha1:abc123", "md5:def456"]
+    },
+    {
+      "key": "vcs_url",
+      "requirement": "optional",
+      "description": "URL to a version control system repository.",
+      "examples": ["git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32"]
+    }
+  ],
+  "validation_rules": {
+    "name": {
+      "examples_valid": ["openssl", "bitwarderl", "my-package"],
+      "examples_invalid": ["", "package/with/slashes"]
+    },
+    "version": {
+      "examples_valid": ["1.1.10g", "2.0", "3.0.1-beta"],
+      "examples_invalid": ["", "latest"]
+    }
+  },
+  "common_patterns": [
+    {
+      "pattern": "pkg:generic/{name}[@{version}]",
+      "description": "Basic generic package reference",
+      "example": "pkg:generic/openssl@1.1.10g"
+    },
+    {
+      "pattern": "pkg:generic/{name}[@{version}]?download_url={url}&checksum={checksum}",
+      "description": "Generic package with download URL and checksum",
+      "example": "pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da"
+    },
+    {
+      "pattern": "pkg:generic/{name}[?vcs_url={url}]",
+      "description": "Generic package with version control URL",
+      "example": "pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32"
+    }
+  ],
+  "anti_patterns": [
+    "pkg:generic/",
+    "pkg:generic/openssl@",
+    "pkg:generic/openssl@latest"
+  ],
+  "parsing_decision_tree": {
+    "steps": [
+      {
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:generic/)",
+        "no": "Proceed with name parsing"
+      },
+      {
+        "question": "Is there a name component?",
+        "yes": "Extract the name (component after namespace/ or after pkg:generic/ if no namespace)",
+        "no": "Invalid PURL - name is required for generic"
+      },
+      {
+        "question": "Is there a version component?",
+        "yes": "Extract everything after @ as version",
+        "no": "Version is optional for generic"
+      },
+      {
+        "question": "Are there qualifiers?",
+        "yes": "Parse key=value pairs after ?",
+        "no": "No qualifiers present"
+      }
+    ]
+  },
+  "context": {
+    "ecosystem": "Generic",
+    "package_manager": "None",
+    "url_scheme": "pkg",
+    "hierarchical_structure": "pkg:generic/[{namespace}/]{name}[@{version}][?{qualifiers}]",
+    "versioning_system": "None specified",
+    "use_case": "Fallback for packages that don't fit other types",
+    "flexibility": "Highly flexible with minimal constraints"
+  },
+  "edge_cases": [
+    {
+      "case": "Packages without version",
+      "handling": "Version is optional and can be omitted",
+      "purl_impact": "Allows referencing packages without version information"
+    },
+    {
+      "case": "Packages with only VCS URL",
+      "handling": "Use vcs_url qualifier to specify version control repository",
+      "purl_impact": "Enables referencing packages directly from version control"
+    },
+    {
+      "case": "Packages with custom download URLs",
+      "handling": "Use download_url qualifier to specify download location",
+      "purl_impact": "Allows referencing packages from arbitrary URLs"
+    }
+  ],
+  "llm_guidance": {
+    "do_not_assume": [
+      "Generic packages have namespaces",
+      "Version is required",
+      "All generic packages have download URLs",
+      "Generic packages follow a specific versioning scheme",
+      "Generic packages are hosted on a specific repository"
+    ],
+    "key_facts_to_remember": [
+      "Namespace is optional for generic packages",
+      "Name is required and can be any string",
+      "Version is optional and can be any string",
+      "Download URL, checksum, and VCS URL are common qualifiers",
+      "Generic type should be used only when no other type fits"
+    ],
+    "common_mistakes_to_avoid": [
+      "Using generic type when a more specific type exists",
+      "Omitting the required name component",
+      "Using 'latest' as version (not a specific version)",
+      "Forgetting to encode special characters in URLs",
+      "Using generic type for packages that fit other types"
+    ]
+  },
+  "examples": [
+    {
+      "purl": "pkg:generic/openssl@1.1.10g",
+      "description": "Basic OpenSSL package reference"
+    },
+    {
+      "purl": "pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da",
+      "description": "OpenSSL package with download URL and checksum"
+    },
+    {
+      "purl": "pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32",
+      "description": "Package with version control URL reference"
+    }
+  ],
+  "incorrect_examples": [
+    {
+      "purl": "pkg:generic/",
+      "description": "Missing name component - name is required for generic",
+      "violation": "name_definition.requirement=required"
+    },
+    {
+      "purl": "pkg:generic/openssl@",
+      "description": "Empty version component - if provided, version should have a value",
+      "violation": "version_definition requires a valid version when present"
+    },
+    {
+      "purl": "pkg:generic/openssl@latest",
+      "description": "Non-specific version - 'latest' is not a specific version",
+      "violation": "version_definition should be a specific version when provided"
+    }
+  ],
+  "note": "When possible another or a new purl type should be used instead of using the generic type and eventually contributed back to this specification. Example have been truncated for brevity",
+  "references": [
+    {
+      "title": "Package URL Specification",
+      "url": "https://github.com/package-url/purl-spec/blob/master/PURL-SPECIFICATION.rst"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-08-16"
+  }
+}
