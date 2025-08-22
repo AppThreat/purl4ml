@@ -14,18 +14,18 @@
     "supported_repositories": [
       "https://cran.r-project.org"
     ],
-    "note": "CRAN packages are hosted on the Comprehensive R Archive Network"
+    "note": "CRAN packages are hosted on the Comprehensive R Archive Network."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for CRAN packages."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": true,
     "encoding": "verbatim",
     "native_name": "name",
-    "note": "The name is the package name and is case sensitive, but there cannot be two packages on CRAN with the same name ignoring case."
+    "note": "The name is the package name. It is case-sensitive, but there cannot be two packages on CRAN with the same name ignoring case, so the canonical case MUST be used."
   },
   "version_definition": {
     "requirement": "required",
@@ -39,19 +39,19 @@
       "case_sensitive": true,
       "unique_case_insensitive": true,
       "examples_valid": ["A3", "rJava", "caret"],
-      "examples_invalid": ["", "A 3", "r@Java"]
+      "examples_invalid": ["A 3", "r@Java"]
     },
     "version": {
       "format": "cran-version",
       "supports_hyphen": true,
       "examples_valid": ["1.0.0", "1.0-4", "6.0-88"],
-      "examples_invalid": ["", "latest", "v1.0.0"]
+      "examples_invalid": ["latest", "v1.0.0"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:cran/{name}@{version}",
-      "description": "Standard CRAN package reference",
+      "description": "Standard CRAN package reference.",
       "example": "pkg:cran/A3@1.0.0"
     }
   ],
@@ -78,11 +78,6 @@
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
         "no": "Invalid PURL - version is required for cran"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
       }
     ]
   },
@@ -90,98 +85,87 @@
     "ecosystem": "R",
     "package_manager": "CRAN",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:cran/{name}@{version}?{qualifiers}",
-    "versioning_system": "CRAN-specific versioning with hyphen support",
-    "naming_convention": "Case-sensitive package names but unique case-insensitive",
-    "repository_model": "Centralized with CRAN as the primary repository"
+    "hierarchical_structure": "pkg:cran/{name}@{version}",
+    "versioning_system": "CRAN-specific versioning with hyphen support.",
+    "naming_convention": "Package names are case-sensitive, but must adhere to a single canonical case as per the case-insensitive uniqueness rule."
   },
   "edge_cases": [
     {
       "case": "Case sensitivity in package names",
-      "handling": "Package names are case-sensitive but CRAN enforces uniqueness ignoring case",
-      "purl_impact": "While technically case-sensitive, packages should be referenced with their canonical case"
+      "handling": "Package names are case-sensitive. Due to the case-insensitive uniqueness rule, only the canonical spelling of a package name is valid in a PURL.",
+      "purl_impact": "Using a non-canonical case for the name component renders the PURL invalid."
     },
     {
       "case": "Version formats with hyphens",
-      "handling": "Versions can contain hyphens to represent patch levels",
-      "purl_impact": "Hyphens in versions are preserved exactly as specified"
+      "handling": "Versions can contain hyphens, which are significant.",
+      "purl_impact": "Hyphens in versions are a valid part of the version string and must be preserved."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "CRAN packages have namespaces",
-      "Package names are case-insensitive",
-      "Version can be omitted",
-      "Package names can contain spaces or special characters",
-      "All packages follow standard SemVer"
+      "CRAN packages have namespaces.",
+      "Package names are case-insensitive.",
+      "Version can be omitted."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for cran packages",
-      "Package name is required and case-sensitive",
-      "Version is required and follows CRAN versioning format",
-      "Package names must be unique case-insensitive on CRAN",
-      "Versions can contain hyphens"
+      "Namespace is prohibited.",
+      "Package name is required and MUST use the canonical case-sensitive spelling.",
+      "Version is required and can contain hyphens."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Omitting the required version component",
-      "Using incorrect case for package names",
-      "Using invalid characters in package names",
-      "Assuming versions follow standard SemVer"
+      "Adding a namespace component.",
+      "Omitting the required version component.",
+      "Using an incorrect, non-canonical case for a package name, which makes the PURL invalid."
     ]
   },
   "examples": [
     {
       "purl": "pkg:cran/A3@1.0.0",
-      "description": "A3 package for R"
+      "description": "A3 package for R."
     },
     {
       "purl": "pkg:cran/rJava@1.0-4",
-      "description": "rJava package with hyphen in version"
+      "description": "rJava package with a hyphen in the version."
     },
     {
       "purl": "pkg:cran/caret@6.0-88",
-      "description": "caret package for machine learning"
+      "description": "caret package for machine learning."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:cran/namespace/A3@1.0.0",
-      "description": "Includes namespace component - namespace is prohibited for cran",
+      "description": "Includes a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:cran/a3@1.0.0",
-      "description": "Package name with incorrect case - while technically different, CRAN enforces uniqueness case-insensitive",
-      "violation": "CRAN enforces unique package names case-insensitive"
+      "description": "Package name with incorrect (non-canonical) case. PURLs must use the canonical case.",
+      "violation": "CRAN enforces unique package names case-insensitively; only the canonical case is valid."
     },
     {
       "purl": "pkg:cran/A3",
-      "description": "Missing version component - version is required for cran",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:cran/A3@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
+      "description": "Empty version component. A version must follow the '@' symbol.",
+      "violation": "Version must not be empty."
     },
     {
       "purl": "pkg:cran/",
-      "description": "Missing package name component - name is required for cran",
+      "description": "Missing name component, which is required.",
       "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "CRAN Documentation",
-      "url": "https://cran.r-project.org/doc/manuals/r-release/R-exts.html"
-    },
-    {
-      "title": "R Package Management",
-      "url": "https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages"
+      "title": "CRAN",
+      "url": "https://cran.r-project.org/"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
