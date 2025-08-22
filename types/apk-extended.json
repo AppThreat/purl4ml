@@ -35,14 +35,14 @@
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is a package version as expected by apk."
+    "note": "The version is a package version as expected by apk. The format is typically 'pkgver-rX', where 'pkgver' may include suffixes like '_alpha', '_p1', etc. The '-rX' release suffix is a strong convention but not strictly required for a version string to be valid."
   },
   "qualifiers_definition": [
     {
       "key": "arch",
       "requirement": "optional",
       "description": "The arch is the qualifiers key for a package architecture.",
-      "examples": ["x86", "x86_64", "aarch64", "armhf", "armv7"]
+      "examples": ["x86", "x86_64", "aarch64", "armhf", "armv7", "noarch"]
     },
     {
       "key": "distro",
@@ -70,10 +70,11 @@
       "examples_invalid": ["Curl", "apk tools", "libcrypto@1.1"]
     },
     "version": {
-      "format": "apk-version",
+      "format": "apk-version (pkgver-rX)",
       "supports_release": true,
-      "examples_valid": ["7.83.0-r0", "2.12.9-r3", "1.2.3"],
-      "examples_invalid": ["7.83.0", "2.12.9-r", "1.2.3-r"]
+      "note": "The release suffix (e.g., '-r0') is a strong convention for repository packages but is not strictly required for a version string to be valid.",
+      "examples_valid": ["7.83.0-r0", "2.12.9-r3", "1.1.1t_p1-r0", "7.83.0"],
+      "examples_invalid": ["2.12.9-r", "1.2.3-r"]
     }
   },
   "common_patterns": [
@@ -81,6 +82,11 @@
       "pattern": "pkg:apk/{vendor}/{name}@{version}?arch={arch}",
       "description": "Standard Alpine package with architecture",
       "example": "pkg:apk/alpine/curl@7.83.0-r0?arch=x86_64"
+    },
+    {
+      "pattern": "pkg:apk/{vendor}/{name}@{version}?arch=noarch",
+      "description": "Architecture-independent package",
+      "example": "pkg:apk/alpine/ca-certificates@20220614-r0?arch=noarch"
     },
     {
       "pattern": "pkg:apk/{vendor}/{name}@{version}?arch={arch}&repository_url={url}",
@@ -91,7 +97,6 @@
   "anti_patterns": [
     "pkg:apk/Alpine/curl@7.83.0-r0?arch=x86",
     "pkg:apk/alpine/Curl@7.83.0-r0?arch=x86",
-    "pkg:apk/alpine/curl@7.83.0?arch=x86",
     "pkg:apk/alpine/curl?arch=x86",
     "pkg:apk/alpine?arch=x86",
     "pkg:apk/curl@7.83.0-r0?arch=x86"
@@ -125,8 +130,8 @@
     "package_manager": "apk",
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:apk/{vendor}/{name}@{version}?{qualifiers}",
-    "versioning_system": "APK versioning with release suffix",
-    "architecture_support": "Specific architectures (x86, x86_64, aarch64, etc.)",
+    "versioning_system": "APK versioning (pkgver-rX) which may include suffixes like _alpha, _p1, etc.",
+    "architecture_support": "Specific architectures (x86, x86_64, aarch64, etc.) and architecture-independent (noarch)",
     "repository_model": "Distributed with no central default repository"
   },
   "edge_cases": [
@@ -136,14 +141,19 @@
       "purl_impact": "Release suffix must be preserved as it affects package version comparison"
     },
     {
-      "case": "Multiple repositories for same vendor",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
+      "case": "Packages with version suffixes",
+      "handling": "Versions may contain suffixes like _alpha, _beta, _rc, or _p(atch) before the release number.",
+      "purl_impact": "These suffixes are part of the version and must be preserved verbatim."
     },
     {
       "case": "Architecture-independent packages",
       "handling": "Use 'noarch' as the architecture value",
       "purl_impact": "These packages can be installed on any architecture"
+    },
+    {
+      "case": "Multiple repositories for same vendor",
+      "handling": "Use repository_url qualifier to specify non-default repository",
+      "purl_impact": "Allows disambiguation when same package exists in multiple repositories"
     }
   ],
   "llm_guidance": {
@@ -151,20 +161,20 @@
       "All apk packages use the 'alpine' vendor",
       "Package names can contain uppercase letters",
       "Versions follow standard SemVer",
-      "Architecture qualifier is optional",
+      "A release number (e.g., -r0) is strictly required",
       "There is a default repository URL"
     ],
     "key_facts_to_remember": [
       "Vendor/namespace is required and must be lowercase",
       "Package name is required and must be lowercase",
       "Version is required and follows APK versioning format",
-      "Versions may include release suffix (-r0, -r3, etc.)",
-      "Architecture qualifier should be included when known"
+      "Versions often include a release suffix (-r0, -r3, etc.) but are valid without one",
+      "Architecture qualifier should be included when known, using 'noarch' for independent packages"
     ],
     "common_mistakes_to_avoid": [
       "Using uppercase letters in vendor or package name",
       "Omitting the required version component",
-      "Forgetting to include architecture when it's relevant",
+      "Incorrectly assuming a version without a release suffix is invalid",
       "Confusing with Android .apk files",
       "Assuming a default repository URL"
     ]
@@ -177,6 +187,14 @@
     {
       "purl": "pkg:apk/alpine/apk-tools@2.12.9-r3?arch=x86_64",
       "description": "APK tools package for x86_64 architecture"
+    },
+    {
+      "purl": "pkg:apk/alpine/openssl@1.1.1t_p1-r0?arch=x86_64",
+      "description": "Package with a patch suffix (_p1) in its version"
+    },
+    {
+      "purl": "pkg:apk/alpine/ca-certificates@20220614-r0?arch=noarch",
+      "description": "An architecture-independent package"
     },
     {
       "purl": "pkg:apk/postmarketos/devicepkg-base@3-r0?arch=aarch64",
@@ -193,11 +211,6 @@
       "purl": "pkg:apk/alpine/Curl@7.83.0-r0?arch=x86",
       "description": "Package name with uppercase letters - violates lowercase requirement",
       "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:apk/alpine/curl@7.83.0?arch=x86",
-      "description": "Missing release number in version - violates APK version format",
-      "violation": "version_definition requires APK version format with release suffix"
     },
     {
       "purl": "pkg:apk/alpine/curl?arch=x86",
@@ -231,6 +244,6 @@
   ],
   "note": "Not to be confused with Android packages with a .apk extension.",
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-22"
   }
 }
