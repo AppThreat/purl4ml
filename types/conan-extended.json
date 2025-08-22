@@ -15,7 +15,7 @@
     "supported_repositories": [
       "https://center.conan.io"
     ],
-    "note": "Conan packages are primarily hosted on the Conan Center"
+    "note": "Conan packages are primarily hosted on the Conan Center."
   },
   "namespace_definition": {
     "requirement": "optional",
@@ -35,137 +35,138 @@
     "native_name": "package-version",
     "note": "The Conan <package-version>."
   },
-  "qualifiers_definition": [
-    {
-      "key": "user",
-      "native_name": "user",
-      "requirement": "optional",
-      "description": "The Conan <user>. Only required if the Conan package was published with <user>.",
-      "examples": ["bincrafters", "conan", "myorg"]
-    },
-    {
-      "key": "channel",
-      "native_name": "channel",
-      "requirement": "optional",
-      "description": "The Conan <channel>. Only required if the Conan package was published with Conan <channel>.",
-      "examples": ["stable", "testing", "release"]
-    },
-    {
-      "key": "rrev",
-      "native_name": "recipe revision",
-      "requirement": "optional",
-      "description": "The Conan recipe revision (optional). If omitted, the purl refers to the latest recipe revision available for the given version.",
-      "examples": ["93a82349c31917d2d674d22065c7a9ef9f380c8e"]
-    },
-    {
-      "key": "prev",
-      "native_name": "package revision",
-      "requirement": "optional",
-      "description": "The Conan package revision (optional). If omitted, the purl refers to the latest package revision available for the given version and recipe revision.",
-      "examples": ["b429db8a0e324114c25ec387bfd8281f330d7c5c"]
-    },
-    {
-      "key": "arch",
-      "requirement": "optional",
-      "description": "Target architecture for the package.",
-      "examples": ["x86_64", "armv8", "armv7"]
-    },
-    {
-      "key": "build_type",
-      "requirement": "optional",
-      "description": "Build type configuration.",
-      "examples": ["Debug", "Release", "RelWithDebInfo"]
-    },
-    {
-      "key": "compiler",
-      "requirement": "optional",
-      "description": "Compiler used to build the package.",
-      "examples": ["Visual Studio", "gcc", "clang"]
-    },
-    {
-      "key": "compiler.version",
-      "requirement": "optional",
-      "description": "Version of the compiler.",
-      "examples": ["16", "11", "13"]
-    },
-    {
-      "key": "compiler.runtime",
-      "requirement": "optional",
-      "description": "Runtime library for the compiler.",
-      "examples": ["MDd", "MTd", "MSVCRT"]
-    },
-    {
-      "key": "os",
-      "requirement": "optional",
-      "description": "Target operating system.",
-      "examples": ["Windows", "Linux", "Android", "macOS"]
-    },
-    {
-      "key": "shared",
-      "requirement": "optional",
-      "description": "Whether the package is built as a shared library.",
-      "examples": ["True", "False"]
-    }
-  ],
+  "qualifiers_definition": {
+    "note": "This list defines common qualifiers. As per the specification, additional qualifiers can be used to distinguish Conan packages with different settings or options. The set of qualifiers is considered open.",
+    "qualifiers": [
+      {
+        "key": "user",
+        "native_name": "user",
+        "requirement": "optional",
+        "description": "The Conan <user>. Only required if the Conan package was published with <user>.",
+        "examples": ["bincrafters", "conan", "myorg"]
+      },
+      {
+        "key": "channel",
+        "native_name": "channel",
+        "requirement": "optional",
+        "description": "The Conan <channel>. Only required if the Conan package was published with Conan <channel>.",
+        "examples": ["stable", "testing", "release"]
+      },
+      {
+        "key": "rrev",
+        "native_name": "recipe revision",
+        "requirement": "optional",
+        "description": "The Conan recipe revision (optional). If omitted, the purl refers to the latest recipe revision available for the given version.",
+        "examples": ["93a82349c31917d2d674d22065c7a9ef9f380c8e"]
+      },
+      {
+        "key": "prev",
+        "native_name": "package revision",
+        "requirement": "optional",
+        "description": "The Conan package revision (optional). If omitted, the purl refers to the latest package revision available for the given version and recipe revision.",
+        "examples": ["b429db8a0e324114c25ec387bfd8281f330d7c5c"]
+      },
+      {
+        "key": "arch",
+        "requirement": "optional",
+        "description": "Target architecture for the package.",
+        "examples": ["x86_64", "armv8", "armv7"]
+      },
+      {
+        "key": "build_type",
+        "requirement": "optional",
+        "description": "Build type configuration.",
+        "examples": ["Debug", "Release", "RelWithDebInfo"]
+      },
+      {
+        "key": "compiler",
+        "requirement": "optional",
+        "description": "Compiler used to build the package.",
+        "examples": ["Visual Studio", "gcc", "clang"]
+      },
+      {
+        "key": "compiler.version",
+        "requirement": "optional",
+        "description": "Version of the compiler.",
+        "examples": ["16", "11", "13"]
+      },
+      {
+        "key": "compiler.runtime",
+        "requirement": "optional",
+        "description": "Runtime library for the compiler.",
+        "examples": ["MDd", "MTd", "MSVCRT"]
+      },
+      {
+        "key": "os",
+        "requirement": "optional",
+        "description": "Target operating system.",
+        "examples": ["Windows", "Linux", "Android", "macOS"]
+      },
+      {
+        "key": "shared",
+        "requirement": "optional",
+        "description": "Whether the package is built as a shared library.",
+        "examples": ["True", "False"]
+      }
+    ]
+  },
   "validation_rules": {
     "namespace": {
       "examples_valid": ["openssl.org", "boostorg", "mycompany"],
-      "examples_invalid": ["", "openssl org", "openssl@org"]
+      "examples_invalid": ["openssl org", "openssl@org"]
     },
     "name": {
       "examples_valid": ["openssl", "boost", "zlib"],
-      "examples_invalid": ["", "open ssl", "openssl@1.0"]
+      "examples_invalid": ["open ssl", "openssl@1.0"]
     },
     "version": {
       "format": "conan-version",
       "examples_valid": ["3.0.3", "1.78.0", "2.0.0"],
-      "examples_invalid": ["", "latest", "v3.0.3"]
+      "examples_invalid": ["latest", "v3.0.3"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:conan/{name}@{version}",
-      "description": "Basic Conan package reference",
+      "description": "Basic Conan package reference.",
       "example": "pkg:conan/openssl@3.0.3"
     },
     {
       "pattern": "pkg:conan/{vendor}/{name}@{version}?user={user}&channel={channel}",
-      "description": "Conan package with vendor, user, and channel",
+      "description": "Conan package with vendor, user, and channel.",
       "example": "pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable"
     },
     {
-      "pattern": "pkg:conan/{vendor}/{name}@{version}?arch={arch}&build_type={build_type}&compiler={compiler}&compiler.runtime={runtime}&compiler.version={version}&os={os}&shared={shared}",
-      "description": "Conan package with build configuration qualifiers",
+      "pattern": "pkg:conan/{vendor}/{name}@{version}?os={os}&arch={arch}&...",
+      "description": "Conan package with build configuration qualifiers.",
       "example": "pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True"
     }
   ],
   "anti_patterns": [
-    "pkg:conan/",
     "pkg:conan/openssl",
     "pkg:conan/openssl@",
-    "pkg:conan/openssl.org/openssl@3.0.3?user=",
-    "pkg:conan/openssl.org/openssl@3.0.3?channel="
+    "pkg:conan/openssl.org/openssl@3.0.3?user="
   ],
   "parsing_decision_tree": {
     "steps": [
       {
-        "question": "Is there a vendor/namespace component?",
-        "yes": "Extract the vendor (first component after pkg:conan/)",
-        "no": "Proceed with name parsing"
+        "question": "Is there a namespace component?",
+        "yes": "Extract the namespace (first component after pkg:conan/)",
+        "no": "Proceed assuming no namespace"
       },
       {
-        "question": "Is there a package name component?",
-        "yes": "Extract the package name (component after vendor/ or after pkg:conan/ if no vendor)",
-        "no": "Invalid PURL - package name is required for conan"
+        "question": "Is there a name component?",
+        "yes": "Extract the name component",
+        "no": "Invalid PURL - name is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for conan"
+        "no": "Invalid PURL - version is required"
       },
       {
         "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
+        "yes": "Parse all key=value pairs after ?",
         "no": "No qualifiers present"
       }
     ]
@@ -174,93 +175,77 @@
     "ecosystem": "C/C++",
     "package_manager": "Conan",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:conan/[{vendor}/]{name}@{version}?{qualifiers}",
+    "hierarchical_structure": "pkg:conan/[{namespace}/]{name}@{version}?{qualifiers}",
     "versioning_system": "Conan-specific versioning",
-    "build_configuration": "Extensive build options through qualifiers",
-    "revision_system": "Supports both recipe and package revisions"
+    "build_configuration": "Extensive build options through an open set of qualifiers.",
+    "revision_system": "Supports both recipe (rrev) and package (prev) revisions as qualifiers."
   },
   "edge_cases": [
     {
-      "case": "Packages without vendor/namespace",
-      "handling": "Vendor is optional and can be omitted",
-      "purl_impact": "Simplifies PURLs for packages without a clear vendor"
+      "case": "Packages without a namespace",
+      "handling": "The namespace is optional and can be omitted.",
+      "purl_impact": "Simplifies PURLs for packages without a clear vendor."
     },
     {
-      "case": "Packages with extensive build options",
-      "handling": "Build options are represented as qualifiers",
-      "purl_impact": "Multiple qualifiers can be used to precisely identify a specific build"
+      "case": "Arbitrary or custom build qualifiers",
+      "handling": "The set of qualifiers is open; any key-value pairs not in the common list are still valid.",
+      "purl_impact": "Allows for precise identification of packages with unique or custom build options."
     },
     {
-      "case": "Packages with revisions",
-      "handling": "Recipe and package revisions are represented as rrev and prev qualifiers",
-      "purl_impact": "Allows precise reference to specific revisions of packages"
+      "case": "Qualifier values with special characters",
+      "handling": "Values containing spaces or other non-URL-safe characters must be percent-encoded.",
+      "purl_impact": "Ensures the PURL remains a valid URI, e.g., 'Visual Studio' becomes 'Visual%20Studio'."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "All Conan packages have a vendor",
-      "Package names can contain any characters",
-      "Version is optional",
-      "User and channel are always required",
-      "All packages have the same build configuration"
+      "All Conan packages have a namespace.",
+      "Version is optional.",
+      "The list of qualifiers in this schema is exhaustive."
     ],
     "key_facts_to_remember": [
-      "Vendor is optional for conan packages",
-      "Package name is required",
-      "Version is required",
-      "User and channel are optional qualifiers",
-      "Build options are represented as qualifiers"
+      "Namespace is optional.",
+      "Package name and version are required.",
+      "User, channel, rrev, and prev are standard, optional qualifiers.",
+      "The set of qualifiers is open; other key-value pairs representing build settings are allowed and common."
     ],
     "common_mistakes_to_avoid": [
-      "Forgetting to include the version component",
-      "Using invalid characters in package names",
-      "Confusing vendor and package name",
-      "Omitting required qualifiers when they are needed",
-      "Using incorrect format for revision qualifiers"
+      "Omitting the required version component.",
+      "Assuming a qualifier is invalid just because it's not in the common list.",
+      "Forgetting to URL-encode qualifier values when necessary."
     ]
   },
   "examples": [
     {
       "purl": "pkg:conan/openssl@3.0.3",
-      "description": "Basic OpenSSL package reference"
+      "description": "Basic OpenSSL package reference."
     },
     {
       "purl": "pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable",
-      "description": "OpenSSL package with vendor, user, and channel"
+      "description": "OpenSSL package with namespace, user, and channel."
     },
     {
       "purl": "pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c",
-      "description": "OpenSSL package with full build configuration and revisions"
+      "description": "OpenSSL package with full build configuration and revisions."
     }
   ],
   "incorrect_examples": [
     {
-      "purl": "pkg:conan/",
-      "description": "Missing package name component - name is required for conan",
-      "violation": "name_definition.requirement=required"
-    },
-    {
       "purl": "pkg:conan/openssl",
-      "description": "Missing version component - version is required for conan",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:conan/openssl@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
+      "description": "Empty version component, which is not allowed.",
+      "violation": "version must not be empty"
     },
     {
       "purl": "pkg:conan/openssl.org/openssl@3.0.3?user=",
-      "description": "Empty user qualifier - if provided, user must have a value",
-      "violation": "qualifiers_definition.user requires a value when present"
-    },
-    {
-      "purl": "pkg:conan/openssl.org/openssl@3.0.3?channel=",
-      "description": "Empty channel qualifier - if provided, channel must have a value",
-      "violation": "qualifiers_definition.channel requires a value when present"
+      "description": "Empty user qualifier value, which is not allowed.",
+      "violation": "qualifier values must not be empty"
     }
   ],
-  "note": "Additional qualifiers can be used to distinguish Conan packages with different settings or options, e.g. os=Linux, build_type=Debug or shared=True. If no additional qualifiers are used to distinguish Conan packages build with different settings or options, then the purl is ambiguous and it is up to the user to work out which package is being referred to (e.g. with context information).",
   "references": [
     {
       "title": "Conan Documentation",
@@ -276,6 +261,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
