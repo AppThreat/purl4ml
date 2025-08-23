@@ -16,7 +16,7 @@
     "supported_repositories": [
       "https://github.com"
     ],
-    "note": "GitHub packages are hosted on GitHub repositories"
+    "note": "GitHub PURLs refer to repositories hosted on GitHub.com."
   },
   "namespace_definition": {
     "requirement": "required",
@@ -36,22 +36,15 @@
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "commit or tag",
-    "note": "The version is a commit or tag."
+    "note": "The version is a commit hash, tag, or branch name."
   },
   "subpath_definition": {
     "requirement": "optional",
     "encoding": "verbatim",
     "native_name": "subpath",
-    "note": "The subpath can be used to reference specific files or directories within the repository."
+    "note": "The subpath, represented as the URI fragment, can be used to reference specific files or directories within the repository."
   },
-  "qualifiers_definition": [
-    {
-      "key": "repository_url",
-      "requirement": "optional",
-      "description": "Custom GitHub Enterprise URL",
-      "examples": ["https://github.enterprise.com"]
-    }
-  ],
+  "qualifiers_definition": [],
   "validation_rules": {
     "namespace": {
       "lowercase_required": true,
@@ -68,18 +61,18 @@
     "version": {
       "format": "commit-hash-or-tag",
       "examples_valid": ["244fd47e07d1004", "v1.0.0", "main"],
-      "examples_invalid": ["", "latest", "v1.0.0@"]
+      "examples_invalid": [""]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:github/{user}/{repo}@{commit}",
-      "description": "Standard GitHub repository with commit hash",
+      "description": "Standard GitHub repository with a commit hash or tag.",
       "example": "pkg:github/package-url/purl-spec@244fd47e07d1004"
     },
     {
       "pattern": "pkg:github/{user}/{repo}@{commit}#{subpath}",
-      "description": "GitHub repository with commit hash and subpath",
+      "description": "GitHub repository with a commit hash and subpath.",
       "example": "pkg:github/package-url/purl-spec@244fd47e07d1004#everybody/loves/dogs"
     }
   ],
@@ -87,35 +80,29 @@
     "pkg:github/Package-URL/purl-spec@244fd47e07d1004",
     "pkg:github/package-url/PURL-SPEC@244fd47e07d1004",
     "pkg:github/package-url/purl-spec",
-    "pkg:github/package-url",
-    "pkg:github"
+    "pkg:github/package-url/purl-spec@244fd47e07d1004?repository_url=foo.com"
   ],
   "parsing_decision_tree": {
     "steps": [
       {
         "question": "Is there a user/organization component?",
         "yes": "Extract the user/organization (first component after pkg:github/)",
-        "no": "Invalid PURL - user/organization is required for github"
+        "no": "Invalid PURL - user/organization is required"
       },
       {
         "question": "Is there a repository name component?",
         "yes": "Extract the repository name (component after user/)",
-        "no": "Invalid PURL - repository name is required for github"
+        "no": "Invalid PURL - repository name is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for github"
+        "no": "Invalid PURL - version is required"
       },
       {
-        "question": "Is there a subpath component?",
+        "question": "Is there a subpath (fragment) component?",
         "yes": "Extract everything after # as subpath",
-        "no": "No subpath present"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "no": "No subpath present."
       }
     ]
   },
@@ -123,103 +110,84 @@
     "ecosystem": "GitHub",
     "package_manager": "Git",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:github/{user}/{repo}@{version}[#{subpath}][?{qualifiers}]",
-    "versioning_system": "Git commit hashes or tags",
-    "repository_model": "Centralized with GitHub as default",
-    "enterprise_support": "GitHub Enterprise supported via repository_url qualifier"
+    "hierarchical_structure": "pkg:github/{user}/{repo}@{version}[#{subpath}]",
+    "versioning_system": "Git commit hashes, tags, or branch names",
+    "repository_model": "Centralized on GitHub.com."
   },
   "edge_cases": [
     {
-      "case": "GitHub Enterprise instances",
-      "handling": "Use repository_url qualifier to specify non-github.com instance",
-      "purl_impact": "Allows referencing packages from enterprise GitHub installations"
-    },
-    {
-      "case": "Repository names with special characters",
-      "handling": "Special characters must be URL-encoded in the PURL",
-      "purl_impact": "Ensures proper parsing of repositories with special characters"
+      "case": "Subpath to a file or directory",
+      "handling": "Use the fragment (#) portion of the PURL to specify a path within the repository.",
+      "purl_impact": "Allows referencing files or directories at a specific commit."
     },
     {
       "case": "Branch names as versions",
-      "handling": "Branch names can be used as version identifiers",
-      "purl_impact": "Enables referencing the latest state of a branch"
+      "handling": "Branch names like 'main' or 'develop' can be used as version identifiers.",
+      "purl_impact": "Enables referencing the latest commit of a specific branch."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "All GitHub packages are on github.com",
-      "Repository names can contain uppercase letters",
-      "Version can be omitted",
-      "User/organization names can contain spaces",
-      "Branch names cannot be used as versions"
+      "GitHub PURLs can point to Enterprise instances.",
+      "Repository names can contain uppercase letters.",
+      "Version can be omitted."
     ],
     "key_facts_to_remember": [
-      "User/organization is required and must be lowercase",
-      "Repository name is required and must be lowercase",
-      "Version is required and can be a commit hash or tag",
-      "Subpath is optional for referencing specific files/directories",
-      "GitHub Enterprise instances use repository_url qualifier"
+      "User/organization is required and must be lowercase.",
+      "Repository name is required and must be lowercase.",
+      "Version is required and can be a commit hash, tag, or branch name.",
+      "The subpath (after a #) is optional for referencing specific files/directories.",
+      "There are no qualifiers for the GitHub PURL type."
     ],
     "common_mistakes_to_avoid": [
-      "Using uppercase letters in user/organization or repository name",
-      "Omitting the required version component",
-      "Forgetting to encode special characters",
-      "Confusing with Bitbucket PURLs",
-      "Assuming all packages are on github.com"
+      "Using uppercase letters in the user/organization or repository name.",
+      "Omitting the required version component.",
+      "Trying to use a 'repository_url' qualifier, which is not supported."
     ]
   },
   "examples": [
     {
       "purl": "pkg:github/package-url/purl-spec@244fd47e07d1004",
-      "description": "Package URL specification repository with commit hash"
+      "description": "Package URL specification repository with a commit hash."
     },
     {
       "purl": "pkg:github/package-url/purl-spec@244fd47e07d1004#everybody/loves/dogs",
-      "description": "Package URL specification repository with commit hash and subpath"
+      "description": "Package URL specification repository with a commit hash and subpath."
     },
     {
-      "purl": "pkg:github/microsoft/vscode@1.70.0",
-      "description": "VS Code repository with version tag"
+      "purl": "pkg:github/microsoft/vscode@v1.70.0",
+      "description": "VS Code repository with a version tag."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:github/Package-URL/purl-spec@244fd47e07d1004",
-      "description": "User/organization with uppercase letters - violates lowercase requirement",
-      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+      "description": "User/organization contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "namespace_definition requires lowercasing."
     },
     {
       "purl": "pkg:github/package-url/PURL-SPEC@244fd47e07d1004",
-      "description": "Repository name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+      "description": "Repository name contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "name_definition requires lowercasing."
     },
     {
       "purl": "pkg:github/package-url/purl-spec",
-      "description": "Missing version component - version is required for github",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
       "purl": "pkg:github/package-url",
-      "description": "Missing repository name component - repository name is required for github",
+      "description": "Missing repository name component, which is required.",
       "violation": "name_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:github",
-      "description": "Missing user/organization component - user/organization is required for github",
-      "violation": "namespace_definition.requirement=required"
     }
   ],
   "references": [
     {
       "title": "GitHub Documentation",
       "url": "https://docs.github.com/"
-    },
-    {
-      "title": "GitHub REST API",
-      "url": "https://docs.github.com/en/rest"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
