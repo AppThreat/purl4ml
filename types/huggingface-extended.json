@@ -81,9 +81,14 @@
   "parsing_decision_tree": {
     "steps": [
       {
-        "question": "How many path segments are there?",
-        "one": "The segment is the name; there is no namespace.",
-        "multiple": "The last segment is the name; all preceding segments joined by '/' form the namespace."
+        "question": "Is there only a single path segment?",
+        "yes": "The segment is the name; there is no namespace.",
+        "no": "Proceed with the next steps."
+      },
+      {
+        "question": "Are there multiple path segments?",
+        "yes": "The segment is the name; there is no namespace.",
+        "no": "The last segment is the name; all preceding segments joined by '/' form the namespace."
       },
       {
         "question": "Is there a version component?",

@@ -35,81 +35,78 @@
     "native_name": "package-version",
     "note": "The Conan <package-version>."
   },
-  "qualifiers_definition": {
-    "note": "This list defines common qualifiers. As per the specification, additional qualifiers can be used to distinguish Conan packages with different settings or options. The set of qualifiers is considered open.",
-    "qualifiers": [
-      {
-        "key": "user",
-        "native_name": "user",
-        "requirement": "optional",
-        "description": "The Conan <user>. Only required if the Conan package was published with <user>.",
-        "examples": ["bincrafters", "conan", "myorg"]
-      },
-      {
-        "key": "channel",
-        "native_name": "channel",
-        "requirement": "optional",
-        "description": "The Conan <channel>. Only required if the Conan package was published with Conan <channel>.",
-        "examples": ["stable", "testing", "release"]
-      },
-      {
-        "key": "rrev",
-        "native_name": "recipe revision",
-        "requirement": "optional",
-        "description": "The Conan recipe revision (optional). If omitted, the purl refers to the latest recipe revision available for the given version.",
-        "examples": ["93a82349c31917d2d674d22065c7a9ef9f380c8e"]
-      },
-      {
-        "key": "prev",
-        "native_name": "package revision",
-        "requirement": "optional",
-        "description": "The Conan package revision (optional). If omitted, the purl refers to the latest package revision available for the given version and recipe revision.",
-        "examples": ["b429db8a0e324114c25ec387bfd8281f330d7c5c"]
-      },
-      {
-        "key": "arch",
-        "requirement": "optional",
-        "description": "Target architecture for the package.",
-        "examples": ["x86_64", "armv8", "armv7"]
-      },
-      {
-        "key": "build_type",
-        "requirement": "optional",
-        "description": "Build type configuration.",
-        "examples": ["Debug", "Release", "RelWithDebInfo"]
-      },
-      {
-        "key": "compiler",
-        "requirement": "optional",
-        "description": "Compiler used to build the package.",
-        "examples": ["Visual Studio", "gcc", "clang"]
-      },
-      {
-        "key": "compiler.version",
-        "requirement": "optional",
-        "description": "Version of the compiler.",
-        "examples": ["16", "11", "13"]
-      },
-      {
-        "key": "compiler.runtime",
-        "requirement": "optional",
-        "description": "Runtime library for the compiler.",
-        "examples": ["MDd", "MTd", "MSVCRT"]
-      },
-      {
-        "key": "os",
-        "requirement": "optional",
-        "description": "Target operating system.",
-        "examples": ["Windows", "Linux", "Android", "macOS"]
-      },
-      {
-        "key": "shared",
-        "requirement": "optional",
-        "description": "Whether the package is built as a shared library.",
-        "examples": ["True", "False"]
-      }
-    ]
-  },
+  "qualifiers_definition": [
+    {
+      "key": "user",
+      "native_name": "user",
+      "requirement": "optional",
+      "description": "The Conan <user>. Only required if the Conan package was published with <user>.",
+      "examples": ["bincrafters", "conan", "myorg"]
+    },
+    {
+      "key": "channel",
+      "native_name": "channel",
+      "requirement": "optional",
+      "description": "The Conan <channel>. Only required if the Conan package was published with Conan <channel>.",
+      "examples": ["stable", "testing", "release"]
+    },
+    {
+      "key": "rrev",
+      "native_name": "recipe revision",
+      "requirement": "optional",
+      "description": "The Conan recipe revision (optional). If omitted, the purl refers to the latest recipe revision available for the given version.",
+      "examples": ["93a82349c31917d2d674d22065c7a9ef9f380c8e"]
+    },
+    {
+      "key": "prev",
+      "native_name": "package revision",
+      "requirement": "optional",
+      "description": "The Conan package revision (optional). If omitted, the purl refers to the latest package revision available for the given version and recipe revision.",
+      "examples": ["b429db8a0e324114c25ec387bfd8281f330d7c5c"]
+    },
+    {
+      "key": "arch",
+      "requirement": "optional",
+      "description": "Target architecture for the package.",
+      "examples": ["x86_64", "armv8", "armv7"]
+    },
+    {
+      "key": "build_type",
+      "requirement": "optional",
+      "description": "Build type configuration.",
+      "examples": ["Debug", "Release", "RelWithDebInfo"]
+    },
+    {
+      "key": "compiler",
+      "requirement": "optional",
+      "description": "Compiler used to build the package.",
+      "examples": ["Visual Studio", "gcc", "clang"]
+    },
+    {
+      "key": "compiler.version",
+      "requirement": "optional",
+      "description": "Version of the compiler.",
+      "examples": ["16", "11", "13"]
+    },
+    {
+      "key": "compiler.runtime",
+      "requirement": "optional",
+      "description": "Runtime library for the compiler.",
+      "examples": ["MDd", "MTd", "MSVCRT"]
+    },
+    {
+      "key": "os",
+      "requirement": "optional",
+      "description": "Target operating system.",
+      "examples": ["Windows", "Linux", "Android", "macOS"]
+    },
+    {
+      "key": "shared",
+      "requirement": "optional",
+      "description": "Whether the package is built as a shared library.",
+      "examples": ["True", "False"]
+    }
+  ],
   "validation_rules": {
     "namespace": {
       "examples_valid": ["openssl.org", "boostorg", "mycompany"],

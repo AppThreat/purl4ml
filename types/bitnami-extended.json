@@ -45,7 +45,6 @@
       "key": "distro",
       "requirement": "required",
       "description": "The qualifier for the Linux distribution associated with the package. This is required to uniquely identify a package artifact.",
-      "note": "The list of examples is not exhaustive. Refer to Bitnami documentation for a full list of supported distributions.",
       "examples": ["debian-12", "ubuntu-22.04", "photon-4", "rhel-9"]
     }
   ],
