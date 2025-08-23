@@ -44,10 +44,6 @@
     "native_name": "version",
     "note": "The version of the package. The format must be valid for comparison by the vercmp(8) utility (see https://man.archlinux.org/man/vercmp.8)."
   },
-  "subpath_definition": {
-    "requirement": "prohibited",
-    "note": "The subpath component is not used for the 'alpm' purl type and must be empty."
-  },
   "qualifiers_definition": [
     {
       "key": "arch",

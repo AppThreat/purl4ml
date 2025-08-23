@@ -22,14 +22,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "user, organization, or project key",
-    "note": "The namespace is the user or organization (for Bitbucket Cloud), or the Project Key (for Bitbucket Server/Data Center). It is not case sensitive and must be lowercased."
+    "note": "The namespace is the user or organization (for Bitbucket Cloud), or the Project Key (for Bitbucket Server/Data Center). It is not case sensitive and must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "repository name",
-    "note": "The name is the repository name. It is not case sensitive and must be lowercased."
+    "note": "The name is the repository name. It is not case sensitive and must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",
