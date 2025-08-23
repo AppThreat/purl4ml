@@ -48,8 +48,8 @@
     },
     {
       "key": "repository_url",
-      "requirement": "optional",
-      "description": "The MLflow tracking URI. Required qualifier since there is no default repository.",
+      "requirement": "required",
+      "description": "The MLflow tracking URI. This qualifier is required as there is no default repository.",
       "examples": [
         "https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace",
         "https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow"
@@ -59,22 +59,22 @@
   "validation_rules": {
     "name": {
       "examples_valid": ["creditfraud", "trafficsigns", "MyModel"],
-      "examples_invalid": ["", "model/name", "model@name"]
+      "examples_invalid": ["model/name", "model@name"]
     },
     "version": {
       "examples_valid": ["3", "10", "1.0"],
-      "examples_invalid": ["", "latest", "v3"]
+      "examples_invalid": ["latest", "v3"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:mlflow/{name}@{version}?repository_url={url}",
-      "description": "MLflow model with repository URL",
+      "description": "MLflow model with a repository URL.",
       "example": "pkg:mlflow/creditfraud@3?repository_url=https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace"
     },
     {
       "pattern": "pkg:mlflow/{name}@{version}?model_uuid={uuid}&run_id={id}&repository_url={url}",
-      "description": "MLflow model with UUID, run ID, and repository URL",
+      "description": "MLflow model with UUID, run ID, and repository URL.",
       "example": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a&repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow"
     }
   ],
@@ -89,28 +89,23 @@
     "steps": [
       {
         "question": "Is there a namespace component?",
-        "yes": "Invalid PURL - namespace is prohibited for mlflow",
+        "yes": "Invalid PURL - namespace is prohibited",
         "no": "Proceed with name parsing"
       },
       {
         "question": "Is there a model name component?",
-        "yes": "Extract the name (component after pkg:mlflow/)",
-        "no": "Invalid PURL - name is required for mlflow"
+        "yes": "Extract the name",
+        "no": "Invalid PURL - name is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for mlflow"
+        "no": "Invalid PURL - version is required"
       },
       {
-        "question": "Is there a repository_url qualifier?",
-        "yes": "Extract the repository URL",
-        "no": "Invalid PURL - repository_url is required for mlflow"
-      },
-      {
-        "question": "Are there other qualifiers?",
-        "yes": "Parse additional key=value pairs",
-        "no": "No additional qualifiers present"
+        "question": "Is there a 'repository_url' qualifier?",
+        "yes": "Parse qualifiers.",
+        "no": "Invalid PURL - 'repository_url' is a required qualifier."
       }
     ]
   },
@@ -120,84 +115,69 @@
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:mlflow/{name}@{version}?{qualifiers}",
     "versioning_system": "Numeric model versions",
-    "platform_support": "Azure ML, Databricks (Azure, AWS, GCP)",
-    "repository_model": "No default repository, repository_url qualifier is required"
+    "repository_model": "Distributed. The 'repository_url' qualifier is required to specify the MLflow tracking URI."
   },
   "edge_cases": [
     {
       "case": "Case sensitivity in model names",
-      "handling": "Case sensitivity depends on server implementation (Azure ML: case-sensitive, Databricks: case-insensitive)",
-      "purl_impact": "Model names should be preserved as-is for Azure ML, lowercased for Databricks"
+      "handling": "Case sensitivity depends on the server implementation (e.g., Azure ML is case-sensitive, Databricks is not). The PURL must reflect the exact casing expected by the target repository.",
+      "purl_impact": "The 'name' component must be preserved verbatim. Consumers of the PURL must know the target system's rules."
     },
     {
       "case": "Multiple MLflow platforms",
-      "handling": "Use repository_url qualifier to specify the MLflow tracking URI",
-      "purl_impact": "Enables referencing models from different MLflow implementations"
-    },
-    {
-      "case": "Models with UUID and run ID",
-      "handling": "Use model_uuid and run_id qualifiers for additional identification",
-      "purl_impact": "Provides more specific identification of model versions"
+      "handling": "Use the required 'repository_url' qualifier to specify the MLflow tracking URI.",
+      "purl_impact": "Enables referencing models from different MLflow implementations."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "MLflow models have namespaces",
-      "Model names are always case-sensitive or always case-insensitive",
-      "Version can be omitted",
-      "There is a default repository",
-      "Repository URL is optional"
+      "MLflow models have namespaces.",
+      "The 'repository_url' qualifier is optional.",
+      "The version can be omitted."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for mlflow models",
-      "Model name is required and case sensitivity depends on platform",
-      "Version is required and is typically numeric",
-      "Repository_url qualifier is required since there is no default repository",
-      "Model UUID and run ID are optional qualifiers for additional identification"
+      "Namespace is prohibited.",
+      "The model name is required, and its case sensitivity depends on the platform.",
+      "The version is required.",
+      "The 'repository_url' qualifier is required.",
+      "The 'model_uuid' and 'run_id' qualifiers are optional."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Omitting the required version component",
-      "Forgetting to include the repository_url qualifier",
-      "Using 'latest' as version (not a specific version)",
-      "Assuming consistent case sensitivity across platforms"
+      "Adding a namespace component.",
+      "Omitting the required version component.",
+      "Forgetting to include the required 'repository_url' qualifier."
     ]
   },
   "examples": [
     {
       "purl": "pkg:mlflow/creditfraud@3?repository_url=https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace",
-      "description": "Credit fraud model from Azure ML"
+      "description": "Credit fraud model from Azure ML."
     },
     {
       "purl": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a&repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow",
-      "description": "Traffic signs model from Azure Databricks with UUID and run ID"
+      "description": "Traffic signs model from Azure Databricks with UUID and run ID."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:mlflow/namespace/creditfraud@3?repository_url=https://...",
-      "description": "Includes namespace component - namespace is prohibited for mlflow",
+      "description": "Includes a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:mlflow/creditfraud@latest?repository_url=https://...",
-      "description": "Non-specific version - 'latest' is not a valid MLflow version",
-      "violation": "version_definition requires a specific version"
+      "description": "Non-specific version. 'latest' is not a valid MLflow version.",
+      "violation": "version_definition requires a specific version."
     },
     {
       "purl": "pkg:mlflow/creditfraud@3",
-      "description": "Missing repository_url qualifier - repository_url is required for mlflow",
-      "violation": "qualifiers_definition.repository_url is required"
+      "description": "Missing the 'repository_url' qualifier, which is required.",
+      "violation": "qualifiers_definition.repository_url.requirement=required"
     },
     {
       "purl": "pkg:mlflow/creditfraud@3?repository_url=",
-      "description": "Empty repository_url qualifier - repository_url must have a value",
-      "violation": "qualifiers_definition.repository_url requires a value"
-    },
-    {
-      "purl": "pkg:mlflow/",
-      "description": "Missing model name component - name is required for mlflow",
-      "violation": "name_definition.requirement=required"
+      "description": "Empty repository_url qualifier value. If a key is present, its value must not be empty.",
+      "violation": "Qualifiers must have a non-empty value."
     }
   ],
   "references": [
@@ -215,6 +195,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
