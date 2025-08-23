@@ -12,101 +12,83 @@
   "repository": {
     "use_repository": true,
     "default_repository_url": "https://huggingface.co",
-    "supported_repositories": [
-      "https://huggingface.co",
-      "https://hub-ci.huggingface.co"
-    ],
     "note": "The default repository is https://huggingface.co."
   },
   "namespace_definition": {
-    "requirement": "required",
+    "requirement": "optional",
     "case_sensitive": true,
     "encoding": "verbatim",
     "native_name": "model repository username or organization",
-    "note": "The namespace is the model repository username or organization, if present. It is case sensitive."
+    "note": "The namespace is the model repository username or organization. It is optional for official models. It is case-sensitive."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": true,
     "encoding": "verbatim",
     "native_name": "model repository name",
-    "note": "The name is the model repository name. It is case sensitive."
+    "note": "The name is the model repository name. It is case-sensitive. For a path like 'a/b', the name is 'b'. For a path like 'a', the name is 'a'."
   },
   "version_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "model revision Git commit hash",
-    "note": "The version is the model revision Git commit hash. It is case insensitive and must be lowercased in the package URL."
+    "note": "The version is the model revision Git commit hash. It is required for unambiguous identification and must be lowercased in the PURL."
   },
   "qualifiers_definition": [
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Custom HuggingFace repository URL",
+      "description": "The base URL for a custom HuggingFace repository instance.",
       "examples": ["https://hub-ci.huggingface.co"]
     }
   ],
   "validation_rules": {
     "namespace": {
       "case_sensitive": true,
-      "examples_valid": ["distilbert-base-uncased", "microsoft", "facebook"],
-      "examples_invalid": ["", "distilbert-base-uncased/", "distilbert@base"]
+      "examples_valid": ["microsoft", "facebook", "google"],
+      "examples_invalid": ["microsoft/"]
     },
     "name": {
       "case_sensitive": true,
       "examples_valid": ["distilbert-base-uncased", "deberta-v3-base", "roberta-base"],
-      "examples_invalid": ["", "deberta-v3-base/", "deberta@v3@base"]
+      "examples_invalid": ["deberta-v3-base/"]
     },
     "version": {
       "format": "git-commit-hash",
       "lowercase_required": true,
       "examples_valid": ["043235d6088ecd3dd5fb5ca3592b6913fd516027", "559062ad13d311b87b2c455e67dcd5f1c8f65111"],
-      "examples_invalid": ["", "043235D6088ECD3DD5FB5CA3592B6913FD516027", "latest"]
+      "examples_invalid": ["043235D6088ECD3DD5FB5CA3592B6913FD516027", "latest", "main"]
     }
   },
   "common_patterns": [
     {
-      "pattern": "pkg:huggingface/{namespace}/{name}@{version}",
-      "description": "Standard HuggingFace model reference",
+      "pattern": "pkg:huggingface/{name}@{version}",
+      "description": "Official HuggingFace model reference (no namespace).",
       "example": "pkg:huggingface/distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027"
     },
     {
-      "pattern": "pkg:huggingface/{namespace}/{name}@{version}?repository_url={url}",
-      "description": "HuggingFace model from custom repository",
-      "example": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https://hub-ci.huggingface.co"
+      "pattern": "pkg:huggingface/{namespace}/{name}@{version}",
+      "description": "HuggingFace model with a namespace.",
+      "example": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111"
     }
   ],
   "anti_patterns": [
-    "pkg:huggingface/Distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027",
-    "pkg:huggingface/microsoft/Deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111",
     "pkg:huggingface/microsoft/deberta-v3-base@559062AD13D311B87B2C455E67DCD5F1C8F65111",
-    "pkg:huggingface/microsoft/deberta-v3-base@latest",
     "pkg:huggingface/microsoft/deberta-v3-base",
-    "pkg:huggingface/microsoft",
-    "pkg:huggingface"
+    "pkg:huggingface/"
   ],
   "parsing_decision_tree": {
     "steps": [
       {
-        "question": "Is there a namespace component?",
-        "yes": "Extract the namespace (first component after pkg:huggingface/)",
-        "no": "Invalid PURL - namespace is required for huggingface"
-      },
-      {
-        "question": "Is there a model name component?",
-        "yes": "Extract the model name (component after namespace/)",
-        "no": "Invalid PURL - model name is required for huggingface"
+        "question": "How many path segments are there?",
+        "one": "The segment is the name; there is no namespace.",
+        "multiple": "The last segment is the name; all preceding segments joined by '/' form the namespace."
       },
       {
         "question": "Is there a version component?",
-        "yes": "Extract everything after @ as version and lowercase it",
-        "no": "Invalid PURL - version is required for huggingface"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "yes": "Extract everything after @ as version and lowercase it.",
+        "no": "Invalid PURL - version is required."
       }
     ]
   },
@@ -114,101 +96,71 @@
     "ecosystem": "Machine Learning",
     "package_manager": "HuggingFace Hub",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:huggingface/{namespace}/{name}@{version}?{qualifiers}",
+    "hierarchical_structure": "pkg:huggingface/[{namespace}/]{name}@{version}[?{qualifiers}]",
     "versioning_system": "Git commit hashes",
-    "case_sensitivity": "Namespace and name are case-sensitive, version is case-insensitive",
-    "repository_model": "Centralized with huggingface.co as default"
+    "case_sensitivity": "Namespace and name are case-sensitive; version is case-insensitive (normalized to lowercase)."
   },
   "edge_cases": [
     {
+      "case": "Official models without a namespace",
+      "handling": "These models have a name component but no namespace component.",
+      "purl_impact": "e.g., pkg:huggingface/bert-base-uncased@..."
+    },
+    {
       "case": "Models from custom repositories",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Allows referencing models from private or alternative HuggingFace instances"
-    },
-    {
-      "case": "Case sensitivity in model names",
-      "handling": "Namespace and model names are case-sensitive and must be preserved exactly",
-      "purl_impact": "Changing case would reference a different model"
-    },
-    {
-      "case": "Version case insensitivity",
-      "handling": "Git commit hashes are case-insensitive but must be lowercased in PURLs",
-      "purl_impact": "Ensures consistent representation of version identifiers"
+      "handling": "Use the 'repository_url' qualifier to specify a non-default repository URL.",
+      "purl_impact": "Allows referencing models from private or alternative HuggingFace instances."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "HuggingFace models don't require a namespace",
-      "Model names are case-insensitive",
-      "Version can be omitted",
-      "Version is case-sensitive",
-      "All models are on the main HuggingFace repository"
+      "All HuggingFace models have a namespace.",
+      "Model names are case-insensitive.",
+      "Version can be omitted."
     ],
     "key_facts_to_remember": [
-      "Namespace is required and represents the model repository username or organization",
-      "Model name is required and case-sensitive",
-      "Version is required and represents a Git commit hash (must be lowercase)",
-      "Namespace and model names are case-sensitive",
-      "Custom repositories use repository_url qualifier"
+      "Namespace is optional and is used for non-official models.",
+      "Name is required and is case-sensitive.",
+      "Version is required and represents a Git commit hash (must be lowercase).",
+      "The 'repository_url' qualifier can be used for non-default repositories."
     ],
     "common_mistakes_to_avoid": [
-      "Omitting the required namespace or model name",
-      "Using uppercase letters in version (must be lowercase)",
-      "Omitting the required version component",
-      "Changing case of namespace or model name",
-      "Using 'latest' as version (not a valid Git commit hash)"
+      "Assuming a namespace is required for all models.",
+      "Using uppercase letters in the version (must be lowercase).",
+      "Omitting the required version component.",
+      "Changing the case of the namespace or name."
     ]
   },
   "examples": [
     {
       "purl": "pkg:huggingface/distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027",
-      "description": "DistilBERT base uncased model"
+      "description": "DistilBERT base uncased model (no namespace)."
     },
     {
       "purl": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https://hub-ci.huggingface.co",
-      "description": "Microsoft DeBERTa v3 base model from CI repository"
+      "description": "Microsoft DeBERTa v3 base model from a CI repository."
     }
   ],
   "incorrect_examples": [
     {
-      "purl": "pkg:huggingface/Distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027",
-      "description": "Namespace with incorrect case - namespace is case-sensitive",
-      "violation": "namespace_definition.case_sensitive=true"
-    },
-    {
-      "purl": "pkg:huggingface/microsoft/Deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111",
-      "description": "Model name with incorrect case - model name is case-sensitive",
-      "violation": "name_definition.case_sensitive=true"
-    },
-    {
       "purl": "pkg:huggingface/microsoft/deberta-v3-base@559062AD13D311B87B2C455E67DCD5F1C8F65111",
-      "description": "Version with uppercase letters - version must be lowercase",
-      "violation": "version_definition.case_sensitive=false and version_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:huggingface/microsoft/deberta-v3-base@latest",
-      "description": "Non-specific version - 'latest' is not a valid Git commit hash",
-      "violation": "version_definition requires a valid Git commit hash"
+      "description": "Version contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "version_definition requires lowercasing."
     },
     {
       "purl": "pkg:huggingface/microsoft/deberta-v3-base",
-      "description": "Missing version component - version is required for huggingface",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
     },
     {
-      "purl": "pkg:huggingface/microsoft",
-      "description": "Missing model name component - model name is required for huggingface",
+      "purl": "pkg:huggingface/",
+      "description": "Missing name component, which is required.",
       "violation": "name_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:huggingface",
-      "description": "Missing namespace and model name components - both are required for huggingface",
-      "violation": "namespace_definition.requirement=required and name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "HuggingFace Documentation",
+      "title": "HuggingFace Hub",
       "url": "https://huggingface.co/docs/hub/index"
     },
     {
@@ -221,6 +173,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
