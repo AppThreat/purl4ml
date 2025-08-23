@@ -14,11 +14,11 @@
     "supported_repositories": [
       "https://hackage.haskell.org"
     ],
-    "note": "Haskell packages are hosted on Hackage"
+    "note": "Haskell packages are hosted on Hackage."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for Hackage packages."
   },
   "name_definition": {
     "requirement": "required",
@@ -28,13 +28,13 @@
     "normalization_rules": [
       "Apply kebab-case"
     ],
-    "note": "The name is case sensitive and use kebab-case."
+    "note": "The name is the package name. It is case-sensitive and MUST be normalized to kebab-case (using hyphens as separators)."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is package version."
+    "note": "The version is the package version."
   },
   "validation_rules": {
     "name": {
@@ -46,13 +46,13 @@
     "version": {
       "format": "hackage-version",
       "examples_valid": ["0.5", "1.2.1", "0.0.0.2"],
-      "examples_invalid": ["", "latest", "v0.5"]
+      "examples_invalid": ["latest", "v0.5"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:hackage/{name}@{version}",
-      "description": "Standard Hackage package reference",
+      "description": "Standard Hackage package reference.",
       "example": "pkg:hackage/a50@0.5"
     }
   ],
@@ -71,19 +71,14 @@
         "no": "Proceed with name parsing"
       },
       {
-        "question": "Is there a package name component?",
-        "yes": "Extract the name (component after pkg:hackage/)",
-        "no": "Invalid PURL - name is required for hackage"
+        "question": "Is the name in valid kebab-case?",
+        "yes": "Extract the name.",
+        "no": "Invalid PURL - name must be in kebab-case."
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
         "no": "Invalid PURL - version is required for hackage"
-      },
-      {
-        "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
       }
     ]
   },
@@ -91,102 +86,83 @@
     "ecosystem": "Haskell",
     "package_manager": "Cabal",
     "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:hackage/{name}@{version}?{qualifiers}",
+    "hierarchical_structure": "pkg:hackage/{name}@{version}",
     "versioning_system": "Hackage versioning",
-    "naming_convention": "Kebab-case for package names",
-    "repository_model": "Centralized with Hackage as the primary repository"
+    "naming_convention": "Package names are case-sensitive and must be normalized to kebab-case."
   },
   "edge_cases": [
     {
-      "case": "Package names with numbers and special characters",
-      "handling": "Package names can start with numbers and contain hyphens",
-      "purl_impact": "Allows for flexible naming conventions while maintaining kebab-case"
+      "case": "Package names starting with numbers",
+      "handling": "Package names can validly start with a number, provided they follow kebab-case.",
+      "purl_impact": "e.g., 'pkg:hackage/3d-graphics-examples@...'"
     },
     {
-      "case": "Case sensitivity in package names",
-      "handling": "Package names are case-sensitive but must follow kebab-case",
-      "purl_impact": "Preserves exact casing while enforcing kebab-case format"
+      "case": "Case sensitivity in names",
+      "handling": "Package names are case-sensitive. 'AC-HalfInteger' and 'ac-halfinteger' are considered different packages.",
+      "purl_impact": "The exact case of the name component must be preserved."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Haskell packages have namespaces",
-      "Package names are case-insensitive",
-      "Version can be omitted",
-      "Package names use snake_case or camelCase",
-      "All packages follow standard SemVer"
+      "Hackage packages have namespaces.",
+      "Package names can be in any format like snake_case or camelCase.",
+      "Version can be omitted."
     ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for hackage packages",
-      "Package name is required and case-sensitive",
-      "Version is required",
-      "Package names must use kebab-case",
-      "Package names can start with numbers"
+      "Namespace is prohibited.",
+      "Package name is required, is case-sensitive, and must be normalized to kebab-case.",
+      "Version is required.",
+      "Package names can start with numbers."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Using snake_case or camelCase for package names",
-      "Omitting the required version component",
-      "Forgetting that package names are case-sensitive",
-      "Using underscores in package names"
+      "Adding a namespace component.",
+      "Failing to normalize the package name to kebab-case (e.g., using underscores).",
+      "Omitting the required version component.",
+      "Changing the case of a package name."
     ]
   },
   "examples": [
     {
       "purl": "pkg:hackage/a50@0.5",
-      "description": "Simple package with numeric prefix"
+      "description": "Simple package name."
     },
     {
       "purl": "pkg:hackage/AC-HalfInteger@1.2.1",
-      "description": "Package with mixed case and hyphens"
+      "description": "Package with mixed case and a hyphen."
     },
     {
       "purl": "pkg:hackage/3d-graphics-examples@0.0.0.2",
-      "description": "Package with numeric prefix and multiple hyphens"
+      "description": "Package with a name starting with a number."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:hackage/namespace/a50@0.5",
-      "description": "Includes namespace component - namespace is prohibited for hackage",
+      "description": "Includes a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:hackage/a_50@0.5",
-      "description": "Package name with underscore - violates kebab-case requirement",
-      "violation": "name_definition requires kebab-case format"
+      "description": "Package name contains an underscore, which violates the kebab-case normalization rule.",
+      "violation": "name_definition requires kebab-case format."
     },
     {
       "purl": "pkg:hackage/a50",
-      "description": "Missing version component - version is required for hackage",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:hackage/a50@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
-    },
-    {
-      "purl": "pkg:hackage/",
-      "description": "Missing package name component - name is required for hackage",
-      "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "Hackage Documentation",
+      "title": "Hackage",
       "url": "https://hackage.haskell.org/"
     },
     {
       "title": "Cabal User Guide",
       "url": "https://cabal.readthedocs.io/en/stable/"
-    },
-    {
-      "title": "Haskell Package Naming Conventions",
-      "url": "https://wiki.haskell.org/Package_naming_conventions"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
