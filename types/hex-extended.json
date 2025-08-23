@@ -16,39 +16,39 @@
     "supported_repositories": [
       "https://repo.hex.pm"
     ],
-    "note": "Hex packages are hosted on the Hex package manager"
+    "note": "Hex packages are hosted on the Hex package manager."
   },
   "namespace_definition": {
     "requirement": "optional",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "organization for private packages",
-    "note": "The namespace is optional; it may be used to specify the organization for private packages on hex.pm. It is not case sensitive and must be lowercased."
+    "note": "The namespace is optional; it may be used to specify the organization for private packages on hex.pm. It must be lowercased."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is not case sensitive and must be lowercased."
+    "note": "The name is the package name. It must be lowercased."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is the package version following Hex versioning scheme."
+    "note": "The version is the package version. The format can be flexible, as shown by valid examples like '2.3.'."
   },
   "subpath_definition": {
     "requirement": "optional",
     "encoding": "verbatim",
     "native_name": "subpath",
-    "note": "The subpath is used to point to a specific file or directory within the package."
+    "note": "The subpath, represented as the URI fragment, is used to point to a specific file or directory within the package."
   },
   "qualifiers_definition": [
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Custom Hex repository URL for private packages",
+      "description": "The base URL for a custom Hex repository.",
       "examples": ["https://myrepo.example.com"]
     }
   ],
@@ -66,29 +66,24 @@
     },
     "version": {
       "format": "hex-version",
-      "examples_valid": ["1.1.2", "2.13.3", "1.2.3"],
-      "examples_invalid": ["", "latest", "v1.1.2", "2.3."]
+      "examples_valid": ["1.1.2", "2.13.3", "1.2.3", "2.3."],
+      "examples_invalid": ["latest", "v1.1.2"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:hex/{name}@{version}",
-      "description": "Standard Hex package reference",
+      "description": "Standard Hex package reference.",
       "example": "pkg:hex/jason@1.1.2"
     },
     {
       "pattern": "pkg:hex/{namespace}/{name}@{version}",
-      "description": "Hex package with organization namespace",
-      "example": "pkg:hex/acme/foo@2.3.0"
-    },
-    {
-      "pattern": "pkg:hex/{name}@{version}#{subpath}",
-      "description": "Hex package with subpath to specific file",
-      "example": "pkg:hex/phoenix_html@2.13.3#priv/static/phoenix_html.js"
+      "description": "Hex package with an organization namespace.",
+      "example": "pkg:hex/acme/foo@2.3."
     },
     {
       "pattern": "pkg:hex/{name}@{version}?repository_url={url}",
-      "description": "Hex package from custom repository",
+      "description": "Hex package from a custom repository.",
       "example": "pkg:hex/bar@1.2.3?repository_url=https://myrepo.example.com"
     }
   ],
@@ -97,8 +92,7 @@
     "pkg:hex/acme/Foo@2.3.0",
     "pkg:hex/acme/foo@latest",
     "pkg:hex/acme/foo",
-    "pkg:hex/acme/foo@",
-    "pkg:hex/"
+    "pkg:hex/acme/foo@"
   ],
   "parsing_decision_tree": {
     "steps": [
@@ -109,23 +103,18 @@
       },
       {
         "question": "Is there a package name component?",
-        "yes": "Extract the package name (component after namespace/ or after pkg:hex/ if no namespace)",
-        "no": "Invalid PURL - name is required for hex"
+        "yes": "Extract the package name",
+        "no": "Invalid PURL - name is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for hex"
-      },
-      {
-        "question": "Is there a subpath component?",
-        "yes": "Extract everything after # as subpath",
-        "no": "No subpath present"
+        "no": "Invalid PURL - version is required"
       },
       {
         "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "yes": "Parse key=value pairs after ?.",
+        "no": "No qualifiers present."
       }
     ]
   },
@@ -134,115 +123,87 @@
     "package_manager": "Hex",
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:hex/[{namespace}/]{name}@{version}[#{subpath}][?{qualifiers}]",
-    "versioning_system": "Hex versioning (similar to SemVer)",
-    "private_packages": "Supports private packages with organization namespace",
-    "repository_model": "Centralized with repo.hex.pm as default, supports custom repositories"
+    "versioning_system": "Hex versioning (SemVer-like, but can be flexible).",
+    "private_packages": "Supports private packages via an optional organization namespace."
   },
   "edge_cases": [
     {
-      "case": "Private packages with organization namespace",
-      "handling": "Use namespace component to specify organization",
-      "purl_impact": "Enables referencing private packages on hex.pm"
-    },
-    {
       "case": "Packages from custom repositories",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Allows referencing packages from private Hex repositories"
+      "handling": "Use the 'repository_url' qualifier to specify the base URL of a non-default Hex repository.",
+      "purl_impact": "Allows referencing packages from private or alternative Hex repositories."
     },
     {
-      "case": "Referencing specific files within packages",
-      "handling": "Use subpath to point to specific files or directories",
-      "purl_impact": "Enables fine-grained reference to package contents"
+      "case": "Private packages with an organization namespace",
+      "handling": "Use the namespace component to specify the organization.",
+      "purl_impact": "Enables referencing private packages on hex.pm."
+    },
+    {
+      "case": "Versions with non-standard formats",
+      "handling": "The version string is preserved as-is. Formats like '2.3.' are valid.",
+      "purl_impact": "Allows for accurate representation of all valid version strings found on Hex."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "All Hex packages have a namespace",
-      "Package names can contain uppercase letters",
-      "Version can be omitted",
-      "All packages are on the public Hex repository",
-      "Subpath is always required"
+      "All Hex packages have a namespace.",
+      "Package names can contain uppercase letters.",
+      "Version can be omitted."
     ],
     "key_facts_to_remember": [
-      "Namespace is optional and represents organization for private packages",
-      "Package name is required and must be lowercase",
-      "Version is required and follows Hex versioning",
-      "Subpath is optional and points to specific files within packages",
-      "Custom repositories use repository_url qualifier"
+      "Namespace is optional and must be lowercase.",
+      "Package name is required and must be lowercase.",
+      "Version is required.",
+      "The 'repository_url' qualifier can be used for custom repositories.",
+      "Subpath is optional and points to specific files within packages."
     ],
     "common_mistakes_to_avoid": [
-      "Using uppercase letters in namespace or package name",
-      "Omitting the required version component",
-      "Using 'latest' as version (not a specific version)",
-      "Forgetting to encode special characters in URLs",
-      "Confusing namespace with repository_url"
+      "Using uppercase letters in the namespace or name.",
+      "Omitting the required version component.",
+      "Incorrectly assuming a strict SemVer format for the version."
     ]
   },
   "examples": [
     {
       "purl": "pkg:hex/jason@1.1.2",
-      "description": "Jason JSON library package"
+      "description": "Jason JSON library package."
     },
     {
-      "purl": "pkg:hex/acme/foo@2.3.0",
-      "description": "Private package with organization namespace"
+      "purl": "pkg:hex/acme/foo@2.3.",
+      "description": "Private package with a non-standard version string."
     },
     {
       "purl": "pkg:hex/phoenix_html@2.13.3#priv/static/phoenix_html.js",
-      "description": "Phoenix HTML package with subpath to specific JavaScript file"
+      "description": "Phoenix HTML package with a subpath to a specific file."
     },
     {
       "purl": "pkg:hex/bar@1.2.3?repository_url=https://myrepo.example.com",
-      "description": "Package from custom Hex repository"
+      "description": "Package from a custom Hex repository specified by 'repository_url'."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:hex/Acme/foo@2.3.0",
-      "description": "Namespace with uppercase letters - violates lowercase requirement",
-      "violation": "namespace_definition.case_sensitive=false and namespace_definition.encoding=lowercase"
+      "description": "Namespace contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "namespace_definition requires lowercasing."
     },
     {
       "purl": "pkg:hex/acme/Foo@2.3.0",
-      "description": "Package name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:hex/acme/foo@latest",
-      "description": "Non-specific version - 'latest' is not a valid Hex version",
-      "violation": "version_definition requires a valid version"
+      "description": "Package name contains uppercase letters, which violates the lowercase requirement.",
+      "violation": "name_definition requires lowercasing."
     },
     {
       "purl": "pkg:hex/acme/foo",
-      "description": "Missing version component - version is required for hex",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:hex/acme/foo@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
-    },
-    {
-      "purl": "pkg:hex/",
-      "description": "Missing package name component - name is required for hex",
-      "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
     {
-      "title": "Hex Documentation",
-      "url": "https://hexdocs.pm/"
-    },
-    {
       "title": "Hex.pm",
       "url": "https://hex.pm/"
-    },
-    {
-      "title": "Elixir Package Management",
-      "url": "https://elixir-lang.org/getting-started/mix-otp/dependencies-and-umbrella-projects.html"
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
