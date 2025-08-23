@@ -32,7 +32,10 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is the package name. It is not case sensitive and must be lowercased. Any characters that are reserved in the PURL specification, such as '@', must be percent-encoded."
+    "note": "The name is the package name. It is not case sensitive and must be lowercased. Any characters that are reserved in the PURL specification, such as '@', must be percent-encoded.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",
