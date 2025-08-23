@@ -22,14 +22,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "vendor",
-    "note": "The namespace is the 'vendor' name such as 'debian' or 'ubuntu'. It must be lowercased."
+    "note": "The namespace is the 'vendor' name such as 'debian' or 'ubuntu'. It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The package name. It must be lowercased."
+    "note": "The package name. It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",

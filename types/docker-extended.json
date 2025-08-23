@@ -25,14 +25,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "registry/user/organization",
-    "note": "The namespace is the registry/user/organization if present."
+    "note": "The namespace is the registry/user/organization if present.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "image name",
-    "note": "The name is the Docker image name."
+    "note": "The name is the Docker image name.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "optional",
