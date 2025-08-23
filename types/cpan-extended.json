@@ -20,7 +20,7 @@
     ],
     "note": "CPAN packages are hosted on various CPAN repositories."
   },
-  "namespace_definition": {
+  "namespace_definition": { 
     "requirement": "optional",
     "case_sensitive": true,
     "encoding": "uppercase",

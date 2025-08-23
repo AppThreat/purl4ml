@@ -5,173 +5,159 @@
   "type_name": "NuGet",
   "description": "NuGet .NET packages",
   "uri_compliance": {
-    "name_encoding": "lowercase",
+    "name_encoding": "verbatim",
     "version_encoding": "verbatim"
   },
   "repository": {
     "use_repository": true,
     "default_repository_url": "https://www.nuget.org",
-    "supported_repositories": [
-      "https://www.nuget.org",
-      "https://api.nuget.org/v3/index.json"
-    ],
-    "note": "NuGet packages are hosted on the official NuGet gallery"
+    "note": "NuGet packages are hosted on the official NuGet gallery. Private or alternative repositories can be specified using the 'repository_url' qualifier."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "NuGet does not have a namespace concept. Dot-separated names are part of the package name, not a namespace."
   },
   "name_definition": {
     "requirement": "required",
-    "case_sensitive": false,
-    "encoding": "lowercase",
+    "case_sensitive": true,
     "native_name": "package id",
-    "note": "Technically the name is case-preserving, but case-insensitive, and NuGet packages archives are case-preserving, while some NuGet API calls demand to lowercase the package name. For consistency, package names should be lowercased in PURLs."
+    "note": "Technically the name is case-perserving, but case-insensitive, and NuGet packages archives are case-perserving, while some NuGet API calls demand to lowercase the package name."
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The NuGet version is semver-like but may contain more than three segments"
+    "note": "The NuGet version is SemVer-like but may contain a fourth integer segment (Major.Minor.Patch.Revision)."
   },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "The URL of the repository where the package can be found.",
+      "examples": [
+        "pkg:nuget/My.Private.Package@1.0.0?repository_url=https://nuget.mycompany.com/v3/index.json"
+      ]
+    }
+  ],
   "validation_rules": {
     "name": {
-      "case_insensitive": true,
-      "lowercase_required": true,
-      "examples_valid": ["enterpriselibrary.common", "newtonsoft.json", "microsoft.aspnetcore.mvc"],
-      "examples_invalid": ["", "EnterpriseLibrary.Common", "package name"]
+      "examples_valid": [
+        "EnterpriseLibrary.Common",
+        "Newtonsoft.Json",
+        "Microsoft.AspNetCore.Mvc"
+      ],
+      "examples_invalid": [
+        "",
+        "package name"
+      ]
     },
     "version": {
       "format": "nuget-version",
       "semver_like": true,
-      "examples_valid": ["6.0.1304", "1.0.0", "2.1.0-preview-final"],
-      "examples_invalid": ["", "latest", "v6.0.1304"]
+      "examples_valid": [
+        "6.0.1304",
+        "13.0.1",
+        "2.1.0-preview-final",
+        "1.2.3.4"
+      ],
+      "examples_invalid": [
+        "",
+        "latest",
+        "v6.0.1304"
+      ]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:nuget/{name}@{version}",
-      "description": "Standard NuGet package reference",
-      "example": "pkg:nuget/enterpriselibrary.common@6.0.1304"
+      "description": "Standard NuGet package reference from the default repository.",
+      "example": "pkg:nuget/EnterpriseLibrary.Common@6.0.1304"
     }
-  ],
-  "anti_patterns": [
-    "pkg:nuget/namespace/EnterpriseLibrary.Common@6.0.1304",
-    "pkg:nuget/EnterpriseLibrary.Common@6.0.1304",
-    "pkg:nuget/enterpriselibrary.common",
-    "pkg:nuget/enterpriselibrary.common@",
-    "pkg:nuget/"
   ],
   "parsing_decision_tree": {
     "steps": [
       {
         "question": "Is there a namespace component?",
-        "yes": "Invalid PURL - namespace is prohibited for nuget",
-        "no": "Proceed with name parsing"
+        "yes": "Invalid PURL - namespace is prohibited for nuget.",
+        "no": "Proceed."
       },
       {
         "question": "Is there a package name component?",
-        "yes": "Extract the name (component after pkg:nuget/)",
-        "no": "Invalid PURL - name is required for nuget"
+        "yes": "Extract the name, preserving its case.",
+        "no": "Invalid PURL - name is required."
       },
       {
         "question": "Is there a version component?",
-        "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for nuget"
+        "yes": "Extract everything after @ as version.",
+        "no": "Invalid PURL - version is required."
       },
       {
         "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "yes": "Parse key=value pairs after ?. Validate supported qualifiers like 'repository_url'.",
+        "no": "No qualifiers present."
       }
     ]
   },
   "context": {
     "ecosystem": ".NET",
     "package_manager": "NuGet",
-    "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:nuget/{name}@{version}?{qualifiers}",
-    "versioning_system": "NuGet versioning (SemVer-like with possible additional segments)",
-    "naming_convention": "Dot-separated names that may appear namespace-like but are not",
-    "repository_model": "Centralized with NuGet Gallery as default"
+    "versioning_system": "NuGet versioning (SemVer-like with an optional fourth revision number)",
+    "naming_convention": "Dot-separated, case-preserving names that are not namespaces.",
+    "repository_model": "Centralized default (NuGet Gallery) with support for private/alternative repositories."
   },
   "edge_cases": [
     {
       "case": "Case sensitivity in package names",
-      "handling": "Package names are case-insensitive but should be lowercased in PURLs",
-      "purl_impact": "Ensures consistent representation despite case-insensitive nature"
-    },
-    {
-      "case": "Pre-release versions",
-      "handling": "Pre-release versions follow SemVer conventions with hyphen and identifier",
-      "purl_impact": "Preserves pre-release status in version string"
+      "handling": "Package names are case-insensitive for resolution in the NuGet ecosystem, but are case-preserving in metadata. The casing in the PURL should reflect the canonical casing as published by the author.",
+      "purl_impact": "Ensures fidelity with the ecosystem's canonical representation. Two PURLs with different casing for the same name refer to the same package but are not identical PURLs."
     }
   ],
   "llm_guidance": {
-    "do_not_assume": [
-      "NuGet packages have namespaces",
-      "Package names are case-sensitive",
-      "Version can be omitted",
-      "Package names can contain spaces",
-      "All packages follow standard SemVer"
-    ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for nuget packages",
-      "Package name is required and should be lowercased in PURLs",
-      "Version is required and follows NuGet versioning (SemVer-like)",
-      "Dot-separated names are not namespaces but part of the package name",
-      "Versions may contain more than three segments"
+      "Namespace is prohibited.",
+      "Package name is required and is case-preserving. The canonical casing should be used.",
+      "Version is required and follows NuGet versioning (can be four parts).",
+      "Dot-separated names are part of the name, not a namespace.",
+      "Use the 'repository_url' qualifier for packages not on the public NuGet gallery."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Using uppercase letters in package names",
-      "Omitting the required version component",
-      "Using 'latest' as version (not a specific version)",
-      "Treating dot-separated names as namespaces"
+      "Adding a namespace.",
+      "Incorrectly lowercasing the entire package name.",
+      "Omitting the required version.",
+      "Splitting the package name at dots as if it were a namespace."
     ]
   },
   "examples": [
     {
-      "purl": "pkg:nuget/enterpriselibrary.common@6.0.1304",
-      "description": "Enterprise Library Common package"
+      "purl": "pkg:nuget/EnterpriseLibrary.Common@6.0.1304",
+      "description": "Standard Enterprise Library Common package."
     },
     {
-      "purl": "pkg:nuget/newtonsoft.json@13.0.1",
-      "description": "Newtonsoft JSON serializer package"
+      "purl": "pkg:nuget/Newtonsoft.Json@13.0.1",
+      "description": "Newtonsoft JSON serializer package."
     },
     {
-      "purl": "pkg:nuget/microsoft.aspnetcore.mvc@2.1.0-preview-final",
-      "description": "ASP.NET Core MVC pre-release package"
+      "purl": "pkg:nuget/Microsoft.AspNetCore.Mvc@2.1.0-preview-final",
+      "description": "ASP.NET Core MVC pre-release package."
     }
   ],
   "incorrect_examples": [
     {
-      "purl": "pkg:nuget/namespace/EnterpriseLibrary.Common@6.0.1304",
-      "description": "Includes namespace component - namespace is prohibited for nuget",
+      "purl": "pkg:nuget/namespace/name@1.0",
+      "description": "Contains a namespace component, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
-      "purl": "pkg:nuget/EnterpriseLibrary.Common@6.0.1304",
-      "description": "Package name with uppercase letters - should be lowercased",
-      "violation": "name_definition.encoding=lowercase"
-    },
-    {
-      "purl": "pkg:nuget/enterpriselibrary.common",
-      "description": "Missing version component - version is required for nuget",
+      "purl": "pkg:nuget/Newtonsoft.Json",
+      "description": "Missing the required version component.",
       "violation": "version_definition.requirement=required"
     },
     {
-      "purl": "pkg:nuget/enterpriselibrary.common@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
-    },
-    {
-      "purl": "pkg:nuget/",
-      "description": "Missing package name component - name is required for nuget",
-      "violation": "name_definition.requirement=required"
+      "purl": "pkg:nuget/Newtonsoft.Json@",
+      "description": "Contains an empty version component.",
+      "violation": "version must be a non-empty string"
     }
   ],
-  "note": "There is no namespace per se even if the common convention is to use dot-separated package names where the first segment is namespace-like.",
   "references": [
     {
       "title": "NuGet Documentation",
@@ -187,6 +173,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
