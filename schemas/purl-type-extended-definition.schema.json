@@ -213,7 +213,15 @@
     "repository",
     "namespace_definition",
     "name_definition",
-    "examples"
+    "examples",
+    "incorrect_examples",
+    "llm_guidance",
+    "edge_cases",
+    "context",
+    "parsing_decision_tree",
+    "anti_patterns",
+    "common_patterns",
+    "validation_rules"
   ],
   "properties": {
     "$schema": {

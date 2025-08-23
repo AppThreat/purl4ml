@@ -27,6 +27,7 @@
     "encoding": "lowercase",
     "native_name": "name",
     "normalization_rules": [
+      "Lowercase the name.",
       "Replace underscore _ with dash -",
       "Replace dot . with underscore _ when used in distribution (sdist, wheel) names"
     ],
@@ -39,11 +40,15 @@
     "native_name": "version",
     "note": "The version is the package version."
   },
+  "subpath_definition": {
+    "requirement": "prohibited",
+    "note": "The subpath component is not used for the pypi type."
+  },
   "qualifiers_definition": [
     {
-      "key": "file_name",
+      "key": "filename",
       "requirement": "optional",
-      "description": "The file_name qualifier selects a particular distribution file (case-sensitive). For naming convention, see the Python Packaging User Guide on source distributions https://packaging.python.org/en/latest/specifications/source-distribution-format/#source-distribution-file-name and on binary distributions https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention and the rules for platform compatibility tags https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/",
+      "description": "The filename qualifier selects a particular distribution file (case-sensitive). For naming convention, see the Python Packaging User Guide on source distributions https://packaging.python.org/en/latest/specifications/source-distribution-format/#source-distribution-file-name and on binary distributions https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention and the rules for platform compatibility tags https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/",
       "examples": ["Django-1.11.1.tar.gz", "Django-1.11.1-py2.py3-none-any.whl"]
     }
   ],
@@ -67,12 +72,12 @@
       "example": "pkg:pypi/django@1.11.1"
     },
     {
-      "pattern": "pkg:pypi/{name}@{version}?file_name={filename}",
+      "pattern": "pkg:pypi/{name}@{version}?filename={filename}",
       "description": "PyPI package with specific distribution file",
       "example": "pkg:pypi/django@1.11.1?filename=Django-1.11.1.tar.gz"
     },
     {
-      "pattern": "pkg:pypi/{name}@{version}?file_name={wheelname}",
+      "pattern": "pkg:pypi/{name}@{version}?filename={wheelname}",
       "description": "PyPI package with specific wheel file",
       "example": "pkg:pypi/django@1.11.1?filename=Django-1.11.1-py2.py3-none-any.whl"
     }
@@ -125,7 +130,7 @@
     },
     {
       "case": "Specific distribution files",
-      "handling": "Use file_name qualifier to specify source distribution or wheel",
+      "handling": "Use filename qualifier to specify source distribution or wheel",
       "purl_impact": "Enables precise reference to specific distribution formats"
     }
   ],
@@ -142,7 +147,7 @@
       "Package name is required and must be lowercase",
       "Version is required",
       "Dashes and underscores are treated as equivalent and normalized to dashes",
-      "file_name qualifier can specify distribution files"
+      "filename qualifier can specify distribution files"
     ],
     "common_mistakes_to_avoid": [
       "Adding a namespace component",
@@ -203,6 +208,10 @@
       "url": "https://pypi.org/"
     },
     {
+      "title": "PEP 440 -- Version Identification and Dependency Specification",
+      "url": "https://peps.python.org/pep-0440/"
+    },
+    {
       "title": "Python Packaging User Guide",
       "url": "https://packaging.python.org/"
     },
@@ -212,6 +221,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
