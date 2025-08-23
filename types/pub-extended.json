@@ -10,56 +10,81 @@
   },
   "repository": {
     "use_repository": true,
-    "default_repository_url": "https://pub.dartlang.org",
+    "default_repository_url": "https://pub.dev",
     "supported_repositories": [
+      "https://pub.dev",
       "https://pub.dartlang.org"
     ],
-    "note": "Pub packages are hosted on the official Dart package repository"
+    "note": "Pub packages are hosted on the official Dart package repository. Private or alternative repositories can be specified using the 'repository_url' qualifier."
   },
   "namespace_definition": {
     "requirement": "prohibited",
-    "note": "there is no namespace"
+    "note": "There is no namespace for Pub packages."
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "permitted_characters": "^[a-z0-9_]",
-    "normalization_rules": [
-      "Replace non-[a-z] letters, non-[0-9] digits with underscore _"
-    ],
-    "note": "Pub normalizes all package names to be lowercase and using underscores. The only allowed characters are [a-z0-9_]. More information on pub naming and versioning is available in the pubspec documentation https://dart.dev/tools/pub/pubspec"
+    "permitted_characters": "^[a-z0-9_]+$",
+    "note": "Pub package names must be lowercase and may only contain letters, numbers, and underscores. The PURL name must adhere to these canonical rules. More information is available in the pubspec documentation: https://dart.dev/tools/pub/pubspec"
   },
   "version_definition": {
     "requirement": "required",
     "encoding": "verbatim",
     "native_name": "version",
-    "note": "The version is the package version following SemVer."
+    "note": "The version must be a valid Semantic Version (SemVer) string."
   },
+  "qualifiers_definition": [
+    {
+      "key": "repository_url",
+      "requirement": "optional",
+      "description": "The URL of the hosted Pub repository where the package can be found.",
+      "examples": [
+        "pkg:pub/my_private_pkg@1.0.0?repository_url=https://pub.mycompany.com"
+      ]
+    }
+  ],
   "validation_rules": {
     "name": {
       "lowercase_required": true,
-      "allowed_characters": "^[a-z0-9_]",
-      "examples_valid": ["characters", "flutter", "http"],
-      "examples_invalid": ["Characters", "package-name", "package@name"]
+      "pattern": "^[a-z0-9_]+$",
+      "examples_valid": [
+        "characters",
+        "flutter",
+        "my_package_name"
+      ],
+      "examples_invalid": [
+        "Characters",
+        "package-name",
+        "package@name"
+      ]
     },
     "version": {
       "format": "semver",
-      "examples_valid": ["1.2.0", "0.0.0", "2.1.3"],
-      "examples_invalid": ["", "latest", "v1.2.0"]
+      "examples_valid": [
+        "1.2.0",
+        "0.0.0",
+        "2.1.3-alpha.1"
+      ],
+      "examples_invalid": [
+        "",
+        "latest",
+        "v1.2.0"
+      ]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:pub/{name}@{version}",
-      "description": "Standard Pub package reference",
+      "description": "Standard Pub package reference from the default repository.",
       "example": "pkg:pub/characters@1.2.0"
     }
   ],
   "anti_patterns": [
     "pkg:pub/namespace/characters@1.2.0",
     "pkg:pub/Characters@1.2.0",
+    "pkg:pub/char-acters@1.2.0",
     "pkg:pub/characters",
     "pkg:pub/characters@",
     "pkg:pub/"
@@ -68,107 +93,100 @@
     "steps": [
       {
         "question": "Is there a namespace component?",
-        "yes": "Invalid PURL - namespace is prohibited for pub",
-        "no": "Proceed with name parsing"
+        "yes": "Invalid PURL - namespace is prohibited for pub.",
+        "no": "Proceed."
       },
       {
         "question": "Is there a package name component?",
-        "yes": "Extract the name (component after pkg:pub/)",
-        "no": "Invalid PURL - name is required for pub"
+        "yes": "Extract the name and validate it matches ^[a-z0-9_]+$.",
+        "no": "Invalid PURL - name is required."
       },
       {
         "question": "Is there a version component?",
-        "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for pub"
+        "yes": "Extract the version and validate it is a valid SemVer string.",
+        "no": "Invalid PURL - version is required."
       },
       {
         "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present"
+        "yes": "Parse key=value pairs, such as 'repository_url'.",
+        "no": "No qualifiers present."
       }
     ]
   },
   "context": {
     "ecosystem": "Dart/Flutter",
     "package_manager": "Pub",
-    "url_scheme": "pkg",
-    "hierarchical_structure": "pkg:pub/{name}@{version}?{qualifiers}",
     "versioning_system": "Semantic Versioning (SemVer)",
-    "naming_convention": "Lowercase with underscores, only [a-z0-9_] allowed",
-    "repository_model": "Centralized with pub.dartlang.org as default"
+    "naming_convention": "Lowercase with underscores, only [a-z0-9_] allowed.",
+    "repository_model": "Centralized default (pub.dev) with support for alternative hosted repositories."
   },
   "edge_cases": [
     {
-      "case": "Package names with special characters",
-      "handling": "Special characters are normalized to underscores",
-      "purl_impact": "Ensures consistent naming despite input variations"
+      "case": "Packages from private repositories",
+      "handling": "Use the 'repository_url' qualifier to specify the repository's base URL.",
+      "purl_impact": "Allows for precise identification of packages from non-default sources."
+    },
+    {
+      "case": "SDK-provided packages (e.g., Flutter)",
+      "handling": "Represented as a standard pub package (e.g., 'pkg:pub/flutter@0.0.0') for consistency, even though its source is the SDK itself.",
+      "purl_impact": "No structural impact; this is a convention for representing a special dependency type."
+    },
+    {
+      "case": "Git and Path dependencies",
+      "handling": "These dependency types are not representable by the 'pub' PURL type and are considered out of scope.",
+      "purl_impact": "This PURL type is limited to packages available in a hosted repository."
     }
   ],
   "llm_guidance": {
-    "do_not_assume": [
-      "Pub packages have namespaces",
-      "Package names can contain uppercase letters",
-      "Version can be omitted",
-      "Package names can contain hyphens or special characters",
-      "All packages follow non-SemVer versioning"
-    ],
     "key_facts_to_remember": [
-      "Namespace is prohibited for pub packages",
-      "Package name is required and must be lowercase with only [a-z0-9_]",
-      "Version is required and follows SemVer",
-      "Special characters in names are normalized to underscores",
-      "Package names are normalized to be consistent"
+      "Namespace is prohibited.",
+      "Package name is required, must be lowercase, and may only contain letters, numbers, and underscores.",
+      "Version is required and must follow SemVer.",
+      "Use the 'repository_url' qualifier for packages not on the public pub.dev repository."
     ],
     "common_mistakes_to_avoid": [
-      "Adding a namespace component",
-      "Using uppercase letters in package names",
-      "Using hyphens or special characters in package names",
-      "Omitting the required version component",
-      "Using non-SemVer version strings"
+      "Using hyphens or uppercase letters in package names.",
+      "Omitting the required version component.",
+      "Using non-SemVer version strings like 'latest'."
     ]
   },
   "examples": [
     {
       "purl": "pkg:pub/characters@1.2.0",
-      "description": "Characters package for Dart"
+      "description": "The 'characters' package from pub.dev."
     },
     {
       "purl": "pkg:pub/flutter@0.0.0",
-      "description": "Flutter framework package"
+      "description": "Represents the Flutter framework SDK dependency."
+    },
+    {
+      "purl": "pkg:pub/my_private_pkg@1.0.0?repository_url=https://pub.mycompany.com",
+      "description": "A package from a private, hosted Pub repository."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:pub/namespace/characters@1.2.0",
-      "description": "Includes namespace component - namespace is prohibited for pub",
+      "description": "Includes a namespace, which is prohibited.",
       "violation": "namespace_definition.requirement=prohibited"
     },
     {
       "purl": "pkg:pub/Characters@1.2.0",
-      "description": "Package name with uppercase letters - violates lowercase requirement",
-      "violation": "name_definition.case_sensitive=false and name_definition.encoding=lowercase"
+      "description": "Package name contains uppercase letters.",
+      "violation": "name must be lowercase and match pattern ^[a-z0-9_]+$"
+    },
+    {
+      "purl": "pkg:pub/char-acters@1.2.0",
+      "description": "Package name contains a hyphen.",
+      "violation": "name must be lowercase and match pattern ^[a-z0-9_]+$"
     },
     {
       "purl": "pkg:pub/characters",
-      "description": "Missing version component - version is required for pub",
+      "description": "Missing the required version component.",
       "violation": "version_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:pub/characters@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
-    },
-    {
-      "purl": "pkg:pub/",
-      "description": "Missing package name component - name is required for pub",
-      "violation": "name_definition.requirement=required"
     }
   ],
   "references": [
-    {
-      "title": "Pub Package Manager Documentation",
-      "url": "https://dart.dev/tools/pub"
-    },
     {
       "title": "Pubspec Documentation",
       "url": "https://dart.dev/tools/pub/pubspec"
@@ -179,6 +197,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
