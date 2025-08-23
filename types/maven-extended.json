@@ -59,7 +59,7 @@
     {
       "key": "repository_url",
       "requirement": "optional",
-      "description": "Custom Maven repository URL",
+      "description": "The base URL of a non-default Maven repository.",
       "examples": ["https://maven.google.com", "https://repo.spring.io/release"]
     }
   ],
@@ -68,48 +68,33 @@
       "case_sensitive": true,
       "dot_notation": true,
       "examples_valid": ["org.apache.xmlgraphics", "net.sf.jacob-projec", "groovy"],
-      "examples_invalid": ["", "org.apache.xmlgraphics/", "org.apache.xmlgraphics@xml"]
+      "examples_invalid": ["org.apache.xmlgraphics/"]
     },
     "name": {
       "case_sensitive": true,
       "examples_valid": ["batik-anim", "jacob", "groovy"],
-      "examples_invalid": ["", "batik-anim/", "batik@anim"]
+      "examples_invalid": ["batik-anim/"]
     },
     "version": {
       "case_sensitive": true,
       "examples_valid": ["1.9.1", "1.14.3", "1.0"],
-      "examples_invalid": ["", "latest", "v1.9.1"]
+      "examples_invalid": ["latest", "v1.9.1"]
     }
   },
   "common_patterns": [
     {
       "pattern": "pkg:maven/{groupId}/{artifactId}@{version}",
-      "description": "Standard Maven artifact reference",
+      "description": "Standard Maven artifact reference (defaults to type=jar).",
       "example": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1"
     },
     {
-      "pattern": "pkg:maven/{groupId}/{artifactId}@{version}?type={type}",
-      "description": "Maven artifact with specific type",
-      "example": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=pom"
-    },
-    {
-      "pattern": "pkg:maven/{groupId}/{artifactId}@{version}?classifier={classifier}",
-      "description": "Maven artifact with classifier",
-      "example": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?classifier=sources"
-    },
-    {
       "pattern": "pkg:maven/{groupId}/{artifactId}@{version}?type={type}&classifier={classifier}",
-      "description": "Maven artifact with both type and classifier",
+      "description": "Maven artifact with both type and classifier.",
       "example": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=zip&classifier=dist"
     },
     {
-      "pattern": "pkg:maven/{groupId}/{artifactId}@{version}?classifier={classifier}&type={type}",
-      "description": "Maven artifact with classifier and type for native libraries",
-      "example": "pkg:maven/net.sf.jacob-projec/jacob@1.14.3?classifier=x86&type=dll"
-    },
-    {
       "pattern": "pkg:maven/{groupId}/{artifactId}@{version}?repository_url={url}",
-      "description": "Maven artifact from custom repository",
+      "description": "Maven artifact from a custom repository.",
       "example": "pkg:maven/groovy/groovy@1.0?repository_url=https://maven.google.com"
     }
   ],
@@ -117,31 +102,29 @@
     "pkg:maven/org.apache.xmlgraphics/batik-anim@latest",
     "pkg:maven/org.apache.xmlgraphics/Batik-anim@1.9.1",
     "pkg:maven/org.apache.xmlgraphics/batik-anim",
-    "pkg:maven/org.apache.xmlgraphics/batik-anim@",
-    "pkg:maven/org.apache.xmlgraphics/",
-    "pkg:maven/"
+    "pkg:maven/org.apache.xmlgraphics/batik-anim@"
   ],
   "parsing_decision_tree": {
     "steps": [
       {
         "question": "Is there a groupId component?",
         "yes": "Extract the groupId (first component after pkg:maven/)",
-        "no": "Invalid PURL - groupId is required for maven"
+        "no": "Invalid PURL - groupId is required"
       },
       {
         "question": "Is there an artifactId component?",
         "yes": "Extract the artifactId (component after groupId/)",
-        "no": "Invalid PURL - artifactId is required for maven"
+        "no": "Invalid PURL - artifactId is required"
       },
       {
         "question": "Is there a version component?",
         "yes": "Extract everything after @ as version",
-        "no": "Invalid PURL - version is required for maven"
+        "no": "Invalid PURL - version is required"
       },
       {
         "question": "Are there qualifiers?",
-        "yes": "Parse key=value pairs after ?",
-        "no": "No qualifiers present (type defaults to jar)"
+        "yes": "Parse key=value pairs after ?.",
+        "no": "No qualifiers present (type defaults to jar)."
       }
     ]
   },
@@ -151,109 +134,81 @@
     "url_scheme": "pkg",
     "hierarchical_structure": "pkg:maven/{groupId}/{artifactId}@{version}?{qualifiers}",
     "versioning_system": "Maven versioning",
-    "coordinate_system": " groupId, artifactId, version, classifier, type",
-    "repository_model": "Centralized with Maven Central as default, supports custom repositories"
+    "coordinate_system": "groupId, artifactId, version, classifier, type",
+    "repository_model": "Centralized with Maven Central as the default, but supports custom repositories via the 'repository_url' qualifier."
   },
   "edge_cases": [
     {
-      "case": "Native libraries with platform-specific classifiers",
-      "handling": "Use classifier and type qualifiers to specify platform and artifact type",
-      "purl_impact": "Enables precise reference to platform-specific native libraries"
-    },
-    {
-      "case": "Multiple artifact types for same GAV",
-      "handling": "Use type qualifier to distinguish between different artifact types",
-      "purl_impact": "Allows disambiguation between JAR, POM, WAR, and other artifact types"
-    },
-    {
       "case": "Artifacts from custom repositories",
-      "handling": "Use repository_url qualifier to specify non-default repository",
-      "purl_impact": "Enables referencing artifacts from enterprise or alternative Maven repositories"
+      "handling": "Use the 'repository_url' qualifier to specify the base URL of a non-default Maven repository.",
+      "purl_impact": "Enables referencing artifacts from enterprise or alternative Maven repositories."
+    },
+    {
+      "case": "Native libraries with platform-specific classifiers",
+      "handling": "Use the 'classifier' and 'type' qualifiers to specify the platform and artifact type.",
+      "purl_impact": "Enables precise reference to platform-specific native libraries (e.g., ?classifier=x86&type=dll)."
+    },
+    {
+      "case": "Multiple artifact types for the same GAV",
+      "handling": "Use the 'type' qualifier to distinguish between different artifact types.",
+      "purl_impact": "Allows disambiguation between JAR, POM, WAR, and other artifact types."
     }
   ],
   "llm_guidance": {
     "do_not_assume": [
-      "Maven artifacts don't require groupId",
-      "Artifact names are case-insensitive",
-      "Version can be omitted",
-      "All artifacts are JAR files",
-      "All artifacts are on Maven Central"
+      "The version can be omitted.",
+      "The groupId or artifactId are case-insensitive.",
+      "All artifacts are on Maven Central."
     ],
     "key_facts_to_remember": [
-      "GroupId is required and represents the namespace",
-      "ArtifactId is required and represents the name",
-      "Version is required and case-sensitive",
-      "Type qualifier defaults to 'jar' when not specified",
-      "Classifier is used to distinguish secondary artifacts"
+      "The groupId (namespace), artifactId (name), and version are all required and case-sensitive.",
+      "The 'type' qualifier defaults to 'jar' if not specified.",
+      "The 'classifier' is used to distinguish secondary artifacts.",
+      "The 'repository_url' qualifier is used for non-default repositories."
     ],
     "common_mistakes_to_avoid": [
-      "Omitting any of the required components (groupId, artifactId, version)",
-      "Using 'latest' as version (not a specific version)",
-      "Changing case of groupId or artifactId",
-      "Forgetting that type defaults to jar",
-      "Confusing classifier with type"
+      "Omitting any of the required GAV components (groupId, artifactId, version).",
+      "Changing the case of the groupId or artifactId.",
+      "Forgetting that the default 'type' is 'jar'."
     ]
   },
   "examples": [
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1",
-      "description": "Batik animation library JAR"
+      "description": "Batik animation library JAR."
     },
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=pom",
-      "description": "Batik animation library POM file"
+      "description": "Batik animation library POM file."
     },
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?classifier=sources",
-      "description": "Batik animation library sources JAR"
-    },
-    {
-      "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=zip&classifier=dist",
-      "description": "Batik animation library distribution ZIP"
-    },
-    {
-      "purl": "pkg:maven/net.sf.jacob-projec/jacob@1.14.3?classifier=x86&type=dll",
-      "description": "JACOB library x86 DLL"
+      "description": "Batik animation library sources JAR."
     },
     {
       "purl": "pkg:maven/net.sf.jacob-projec/jacob@1.14.3?classifier=x64&type=dll",
-      "description": "JACOB library x64 DLL"
+      "description": "JACOB library 64-bit DLL."
     },
     {
       "purl": "pkg:maven/groovy/groovy@1.0?repository_url=https://maven.google.com",
-      "description": "Groovy library from Google Maven repository"
+      "description": "Groovy library from the Google Maven repository."
     }
   ],
   "incorrect_examples": [
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@latest",
-      "description": "Non-specific version - 'latest' is not a valid Maven version",
-      "violation": "version_definition requires a specific version"
+      "description": "Non-specific version. 'latest' is not a valid Maven version string.",
+      "violation": "version_definition requires a specific version."
     },
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/Batik-anim@1.9.1",
-      "description": "ArtifactId with incorrect case - artifactId is case-sensitive",
+      "description": "ArtifactId with incorrect case. It is case-sensitive.",
       "violation": "name_definition.case_sensitive=true"
     },
     {
       "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim",
-      "description": "Missing version component - version is required for maven",
+      "description": "Missing version component, which is required.",
       "violation": "version_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:maven/org.apache.xmlgraphics/batik-anim@",
-      "description": "Empty version component - version cannot be empty",
-      "violation": "version_definition requires a valid version"
-    },
-    {
-      "purl": "pkg:maven/org.apache.xmlgraphics/",
-      "description": "Missing artifactId component - artifactId is required for maven",
-      "violation": "name_definition.requirement=required"
-    },
-    {
-      "purl": "pkg:maven/",
-      "description": "Missing groupId and artifactId components - both are required for maven",
-      "violation": "namespace_definition.requirement=required and name_definition.requirement=required"
     }
   ],
   "references": [
@@ -271,6 +226,6 @@
     }
   ],
   "metadata": {
-    "last_updated": "2025-08-16"
+    "last_updated": "2025-08-23"
   }
 }
