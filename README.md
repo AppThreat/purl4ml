@@ -89,6 +89,7 @@ MIT
 
 Use the below citation in your research.
 
+```
 @misc{vdb,
   author = {Team AppThreat},
   month = Aug,
@@ -96,3 +97,4 @@ Use the below citation in your research.
   howpublished = {{https://huggingface.co/datasets/AppThreat/purl4ml}},
   year = {2025}
 }
+```
