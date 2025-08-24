@@ -235,11 +235,6 @@
       "violation": "Reserved characters like '@' in the name component must be percent-encoded."
     },
     {
-      "purl": "pkg:alpm/arch/python-pip@21.0-1?arch=x86_64&subpath=lib",
-      "description": "Subpath is present - subpath is prohibited for the alpm type.",
-      "violation": "subpath_definition.requirement=prohibited"
-    },
-    {
       "purl": "pkg:alpm/arch/pacman?arch=x86_64",
       "description": "Missing version component - version is required for alpm",
       "violation": "version_definition.requirement=required"

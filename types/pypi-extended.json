@@ -41,9 +41,11 @@
     "note": "The version is the package version."
   },
   "subpath_definition": {
-    "requirement": "prohibited",
-    "note": "The subpath component is not used for the pypi type."
-  },
+    "requirement": "optional",
+    "encoding": "verbatim",
+    "native_name": "subpath",
+    "note": "The subpath, represented as the URI fragment, is used to point to a sub-directory inside a package."
+  },  
   "qualifiers_definition": [
     {
       "key": "filename",

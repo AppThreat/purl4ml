@@ -23,14 +23,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "organization for private packages",
-    "note": "The namespace is optional; it may be used to specify the organization for private packages on hex.pm. It must be lowercased."
+    "note": "The namespace is optional; it may be used to specify the organization for private packages on hex.pm. It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is the package name. It must be lowercased."
+    "note": "The name is the package name. It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",

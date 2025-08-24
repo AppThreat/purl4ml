@@ -27,7 +27,10 @@
     "encoding": "lowercase",
     "native_name": "name",
     "permitted_characters": "^[a-z0-9_]+$",
-    "note": "Pub package names must be lowercase and may only contain letters, numbers, and underscores. The PURL name must adhere to these canonical rules. More information is available in the pubspec documentation: https://dart.dev/tools/pub/pubspec"
+    "note": "Pub package names must be lowercase and may only contain letters, numbers, and underscores. The PURL name must adhere to these canonical rules. More information is available in the pubspec documentation: https://dart.dev/tools/pub/pubspec",
+    "normalization_rules": [
+      "Replace non-[a-z] letters, non-[0-9] digits with underscore _"
+    ]
   },
   "version_definition": {
     "requirement": "required",

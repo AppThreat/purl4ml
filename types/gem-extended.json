@@ -25,7 +25,10 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The name is the gem name and must be lowercase."
+    "note": "The name is the gem name and must be lowercase.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",

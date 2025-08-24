@@ -33,7 +33,10 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "model revision Git commit hash",
-    "note": "The version is the model revision Git commit hash. It is required for unambiguous identification and must be lowercased in the PURL."
+    "note": "The version is the model revision Git commit hash. It is required for unambiguous identification and must be lowercased in the PURL.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "qualifiers_definition": [
     {

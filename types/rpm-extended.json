@@ -37,10 +37,6 @@
     "native_name": "version-release",
     "note": "The version, which is the combined version and release string of an RPM (e.g., '7.50.3-1.fc25')."
   },
-  "subpath_definition": {
-    "requirement": "prohibited",
-    "note": "The subpath component is not used for the rpm type."
-  },
   "qualifiers_definition": [
     {
       "key": "arch",

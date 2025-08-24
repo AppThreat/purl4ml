@@ -22,14 +22,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "module path prefix",
-    "note": "The namespace consists of all path segments before the final name segment (e.g., for 'a/b/c', the namespace is 'a/b'). It must be lowercased."
+    "note": "The namespace consists of all path segments before the final name segment (e.g., for 'a/b/c', the namespace is 'a/b'). It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "package name",
-    "note": "The name is the final path segment of the Go package path (e.g., for 'a/b/c', the name is 'c'). It must be lowercased."
+    "note": "The name is the final path segment of the Go package path (e.g., for 'a/b/c', the name is 'c'). It must be lowercased.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "optional",

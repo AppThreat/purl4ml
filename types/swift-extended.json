@@ -34,10 +34,6 @@
     "native_name": "package version",
     "note": "The version is required and typically corresponds to a Git tag. A leading 'v' should be stripped for canonical representation."
   },
-  "subpath_definition": {
-    "requirement": "prohibited",
-    "note": "The subpath component is not used for the swift type."
-  },
   "validation_rules": {
     "namespace": {
       "case_sensitive": true,

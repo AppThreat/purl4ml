@@ -36,10 +36,6 @@
     "native_name": "version",
     "note": "The version is the package version, which may include timestamps and other identifiers."
   },
-  "subpath_definition": {
-    "requirement": "prohibited",
-    "note": "The subpath component is not used for the qpkg type."
-  },
   "qualifiers_definition": [
     {
       "key": "repository_url",

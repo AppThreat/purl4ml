@@ -21,14 +21,20 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "image name",
-    "note": "The name must be lowercase. It is defined as the last path segment of the full repository name. For example, if the repository is 'gcr.io/distroless/static', the purl name is 'static'."
+    "note": "The name must be lowercase. It is defined as the last path segment of the full repository name. For example, if the repository is 'gcr.io/distroless/static', the purl name is 'static'.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "digest",
-    "note": "The version must be the lowercase, hex-encoded digest of the artifact, prefixed with the algorithm. For this PURL type, only 'sha256' is currently specified. The colon separating the algorithm and digest MUST be percent-encoded as '%3A'."
+    "note": "The version must be the lowercase, hex-encoded digest of the artifact, prefixed with the algorithm. For this PURL type, only 'sha256' is currently specified. The colon separating the algorithm and digest MUST be percent-encoded as '%3A'.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "qualifiers_definition": [
     {

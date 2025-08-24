@@ -22,21 +22,30 @@
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "user manifest",
-    "note": "The user manifest under which the package is registered. If not given, the root manifest is assumed. It must be normalized to ASCII lowercase."
+    "note": "The user manifest under which the package is registered. If not given, the root manifest is assumed. It must be normalized to ASCII lowercase.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "name_definition": {
     "requirement": "required",
     "case_sensitive": false,
     "encoding": "lowercase",
     "native_name": "name",
-    "note": "The LuaRocks package name. It must be normalized to ASCII lowercase."
+    "note": "The LuaRocks package name. It must be normalized to ASCII lowercase.",
+    "normalization_rules": [
+      "It is not case sensitive and must be lowercased."
+    ]
   },
   "version_definition": {
     "requirement": "required",
     "case_sensitive": true,
     "encoding": "lowercase",
     "native_name": "full package version, including module version and rockspec revision",
-    "note": "The full LuaRocks package version, including module version and rockspec revision. While technically case-sensitive, it must be lowercased in a PURL to ensure compatibility."
+    "note": "The full LuaRocks package version, including module version and rockspec revision. While technically case-sensitive, it must be lowercased in a PURL to ensure compatibility.",
+    "normalization_rules": [
+      "It must be lowercased."
+    ]
   },
   "qualifiers_definition": [
     {
